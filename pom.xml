@@ -52,6 +52,12 @@
       <version>4.8.2</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+	  <groupId>papu</groupId>
+	  <artifactId>annotations</artifactId>
+	  <packaging>jar</packaging>
+	  <version>0.0.1-SNAPSHOT</version>
+    </dependency>
     
 	<!-- Eclipse parser tools (in local project maven repo) -->
 	<dependency>

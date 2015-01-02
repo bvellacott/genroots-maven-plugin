@@ -32,10 +32,19 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+
+import papu.annotations.Expose;
 
 /**
  * Goal which generates roots from EJB Entities according to a given template.
@@ -72,23 +81,30 @@ public class GenerateRoots
 		
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
     }
+    
+    public static void main(String[] args) throws MojoExecutionException
+    {
+    	GenerateRoots genRoots = new GenerateRoots();
+    	genRoots.projectDir = new File("src/main/java");
+    	genRoots.routeTemplate = new File("test.template");
+    	genRoots.execute();
+    }
 	
     public void execute() throws MojoExecutionException
     {
     	StringBuilder logBuilder = new StringBuilder();;
     	try
     	{
-    		this.getLog().info("Scanning for source files annotated @Expose");
+    		this.getLog().info("Scanning for source files annotated @" + Expose.class.getSimpleName());
     		List<File> files = this.getAnnotatedSourceFiles(projectDir, null);
     		logBuilder.setLength(0);
-    		logBuilder.append("Finished scanning for annotated source files. Found:\n");
+    		logBuilder.append("Finished scanning for annotated source files. Found " + files.size() + " files:\n");
     		for(File f : files)
     		{
     			logBuilder.append("\t");
     			logBuilder.append(f.getAbsolutePath());
     			logBuilder.append("\n");
     		}
-    		logBuilder.append("Finished scan for annotated source files. Found: " + files.size() + " files.");
     		this.getLog().info(logBuilder.toString());
     		
     		if(files.size() > 0)
@@ -143,13 +159,17 @@ public class GenerateRoots
 		
 		for(File f : fileArray)
 		{
+			this.getLog().info("\tScanning: " + f.getAbsolutePath());
 			if(f.isDirectory())
 			{
 				this.getAnnotatedSourceFiles(f, aFileList);
 			}
-			else if(f.getName().split(".").equals("java") && isFileAnnotated(f))
+			else if(f.getName().endsWith(".java"))
 			{
-				aFileList.add(f);
+				if(isFileAnnotated(f))
+				{
+					aFileList.add(f);
+				}
 			}
 		}
 		
@@ -196,8 +216,9 @@ public class GenerateRoots
 	
 	private boolean isCompilationUnitAnnotated(final CompilationUnit aCompilationUnit, final File aSourceFile)
 	{
-		Visitor visitor = new Visitor(aCompilationUnit, aSourceFile);
-			
+		Visitor visitor = new Visitor(aSourceFile);
+		
+		this.getLog().info("\tVisiting: " + aSourceFile);
 		aCompilationUnit.accept(visitor);
 		
 		return visitor.isAnnotated;
@@ -206,19 +227,29 @@ public class GenerateRoots
 	private class Visitor extends ASTVisitor
 	{
 		public boolean isAnnotated = false;
-		private CompilationUnit parent;
+		private TypeDeclaration parent;
 		private File sourceFile;
 		
-		public Visitor(CompilationUnit aParent, File aSourceFile)
+		public Visitor(File aSourceFile)
 		{
-			parent = aParent;
 			sourceFile = aSourceFile;
 		}
 		
-		public boolean visit(AnnotationTypeMemberDeclaration aAnnotation)
+		public boolean visit(TypeDeclaration aType)
 		{
-			if(aAnnotation.getName().toString().equals("Expose"))
+			this.parent = aType;
+			return true;
+		}
+		
+		public boolean visit(MarkerAnnotation aAnnotation)
+		{
+			getLog().info(aAnnotation.getTypeName().toString());
+			
+			if(aAnnotation.getTypeName().toString().equals(Expose.class.getSimpleName()))
 			{
+				getLog().info("Annotation parent: " + ((TypeDeclaration)aAnnotation.getParent()).getName());
+				getLog().info("Expected parent: " + parent.getName());
+				
 				if(!aAnnotation.getParent().equals(parent))
 				{
 					try 
@@ -239,6 +270,7 @@ public class GenerateRoots
 			
 			return true;
 		}
+		
 	};
 	
 }
