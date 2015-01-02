@@ -20,6 +20,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +53,7 @@ import papu.annotations.Expose;
  * Goal which generates roots from EJB Entities according to a given template.
  *
  */
-@Mojo( name = "touch", defaultPhase = LifecyclePhase.PROCESS_SOURCES )
+@Mojo( name = "process", defaultPhase = LifecyclePhase.PROCESS_CLASSES )
 public class GenerateRoots
     extends AbstractMojo
 {
@@ -273,4 +276,12 @@ public class GenerateRoots
 		
 	};
 	
-}
+	private URL createUrl(File fe) {
+	        URL url=fe.toURI().toURL();
+	        URLClassLoader.getSystemClassLoader().
+	        getLog().info("Added URL: '"+url.toString()+"'");
+	        if(classPath.length()>0) { classPath+=File.pathSeparator; }
+	        this.classPath+=fe.getPath();
+	        return url;
+	    }
+	}
