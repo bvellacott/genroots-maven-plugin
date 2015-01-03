@@ -1,0 +1,71 @@
+package {{packageName}};
+
+import java.util.List;
+
+import javax.ejb.Singleton;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+
+import papu.mvc.Controller;
+
+{{{imports}}}
+
+@Singleton
+@Path("{{plural}}")
+public class {{routeClassName}} 
+extends
+Controller<{{className}}, {{idClassName}}>
+{
+
+	@PersistenceUnit(unitName = "{{persistenceUnitName}}")
+	private EntityManagerFactory emf;
+	
+	@Override
+	public Class<{{className}}> getModelClass() {
+		return {{className}}.class;
+	}
+
+	@Override
+	public EntityManagerFactory getEntityManagerFactory()
+	{
+		return emf;
+	}
+	
+	@Override
+{{{idSetterCode}}}
+	
+	@POST
+	public {{className}} createModel({{className}} aMsg ) throws Exception {
+		return create(aMsg);
+	}
+
+	@GET
+	public List<{{className}}> findAllMessages() throws Exception {
+		return findAll(this.getModelClass());
+	}
+
+	@GET
+	@Path("/{{idPathExtension}}")
+	public {{className}} findMessage({{{pathParamDeclaration}}} {{idClassName}} aId ) throws Exception {
+		return find(aId);
+	}
+
+	@PUT
+	@Path("/{{idPathExtension}}")
+	public {{className}} updateModel({{{pathParamDeclaration}}} {{idClassName}} aId, {{className}} aMsg ) throws Exception {
+		return update(aId, aMsg);
+	}
+
+	@DELETE
+	@Path("/{{idPathExtension}}")
+	public {{className}} deleteModel({{{pathParamDeclaration}}} {{idClassName}} aId ) throws Exception {
+		return delete(aId, this.getModelClass());
+	}
+
+}

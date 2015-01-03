@@ -16,6 +16,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.target>1.7</maven.compiler.target>
     <maven.compiler.source>1.7</maven.compiler.source>
+    <openejb.javaee.api>6.0-6</openejb.javaee.api>
   </properties>
 
   <repositories>
@@ -29,78 +30,97 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>3.0.5</version>
+      <version>3.2.5</version>
+		<exclusions>
+		  <exclusion>
+			<groupId>org.sonatype.sisu</groupId>
+			<artifactId>guava</artifactId>
+		  </exclusion>
+		</exclusions> 
     </dependency>
 	<dependency>
 		<groupId>org.apache.maven</groupId>
 		<artifactId>maven-core</artifactId>
-		<version>3.0.5</version>
+		<version>3.2.5</version>
+		<exclusions>
+		  <exclusion>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		  </exclusion>
+		</exclusions> 
 		<scope>provided</scope>
 	</dependency>
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.2</version>
+      <version>3.3</version>
+		<exclusions>
+		</exclusions> 
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-utils</artifactId>
       <version>3.0.8</version>
+		<exclusions>
+		</exclusions> 
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.2</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
+	<dependency>
+      <groupId>org.apache.openejb</groupId>
+      <artifactId>javaee-api</artifactId>
+      <version>${openejb.javaee.api}</version>
+		<exclusions>
+		</exclusions> 
+	</dependency>
+	<dependency>
 	  <groupId>papu</groupId>
-	  <artifactId>annotations</artifactId>
-	  <version>0.0.1-SNAPSHOT</version>
-    </dependency>
-    
-	<!-- Eclipse parser tools (in local project maven repo) -->
-	<dependency>
-	  <groupId>org.eclipse.core</groupId>
-	  <artifactId>runtime</artifactId>
-	  <version>3.10.0.v20140318-2214</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.eclipse.equinox</groupId>
-	  <artifactId>preferences</artifactId>
-	  <version>3.5.200.v20140224-1527</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.eclipse.core</groupId>
-	  <artifactId>jobs</artifactId>
-	  <version>3.6.0.v20140424-0053</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.eclipse.jdt</groupId>
 	  <artifactId>core</artifactId>
-	  <version>3.10.0.v20140902-0626</version>
+	  <version>0.0.1-SNAPSHOT</version>
+		<exclusions>
+		  <exclusion>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		  </exclusion>
+		</exclusions> 
 	</dependency>
+    
+	<!-- Google reflections -->
 	<dependency>
-	  <groupId>org.eclipse.equinox</groupId>
-	  <artifactId>common</artifactId>
-	  <version>3.6.200.v20130402-1505</version>
+		<groupId>org.reflections</groupId>
+		<artifactId>reflections</artifactId>
+		<version>0.9.9</version>
+		<exclusions>
+		  <exclusion>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		  </exclusion>
+		</exclusions> 
 	</dependency>
+	
+	<!-- Mustache -->
 	<dependency>
-	  <groupId>org.eclipse.core</groupId>
-	  <artifactId>contenttype</artifactId>
-	  <version>3.4.200.v20140207-1251</version>
+		<groupId>com.github.spullara.mustache.java</groupId>
+		<artifactId>compiler</artifactId>
+		<version>0.8.12</version>
+		<exclusions>
+		  <exclusion>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		  </exclusion>
+		</exclusions> 
 	</dependency>
+
 	<dependency>
-	  <groupId>org.eclipse.core</groupId>
-	  <artifactId>resources</artifactId>
-	  <version>3.9.1.v20140825-1431</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.eclipse</groupId>
-	  <artifactId>osgi</artifactId>
-	  <version>3.10.2.v20141020-1740</version>
-	</dependency>
+		<groupId>com.google.guava</groupId>
+		<artifactId>guava</artifactId>
+		<version>18.0</version>
+	</dependency>	
   </dependencies>
 
   <build>
@@ -165,7 +185,6 @@
             </executions>
           </plugin>
         </plugins>
-
       </build>
     </profile>
   </profiles>
