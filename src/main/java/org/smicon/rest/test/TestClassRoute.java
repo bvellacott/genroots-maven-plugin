@@ -15,7 +15,6 @@ import javax.ws.rs.PathParam;
 import papu.mvc.Controller;
 
 import java.lang.Integer;
-import org.smicon.rest.test.TestClass;
 
 
 @Singleton
@@ -34,14 +33,13 @@ Controller<TestClass, Integer>
 	}
 
 	@Override
-	public EntityManagerFactory getEntityManagerFactory()
-	{
+	public EntityManagerFactory getEntityManagerFactory() {
 		return emf;
 	}
-	
+
 	@Override
 	public void setModelId(TestClass aModel, Integer aId) {
-		aModel.id1 = aId;
+		aModel.setId1(aId);
 	}
 	
 	@POST
@@ -55,21 +53,21 @@ Controller<TestClass, Integer>
 	}
 
 	@GET
-	@Path("/{id}")
-	public TestClass findMessage(@PathParam("id") Integer aId ) throws Exception {
-		return find(aId);
+	@Path("/{id1}")
+	public TestClass findMessage(@PathParam("id1") int id1) throws Exception {
+		return find(id1);
 	}
 
 	@PUT
-	@Path("/{id}")
-	public TestClass updateModel(@PathParam("id") Integer aId, TestClass aMsg ) throws Exception {
-		return update(aId, aMsg);
+	@Path("/{id1}")
+	public TestClass updateModel(@PathParam("id1") int id1, TestClass aMsg ) throws Exception {
+		return update(id1, aMsg);
 	}
 
 	@DELETE
-	@Path("/{id}")
-	public TestClass deleteModel(@PathParam("id") Integer aId ) throws Exception {
-		return delete(aId, this.getModelClass());
+	@Path("/{id1}")
+	public TestClass deleteModel(@PathParam("id1") int id1) throws Exception {
+		return delete(id1, this.getModelClass());
 	}
 
 }

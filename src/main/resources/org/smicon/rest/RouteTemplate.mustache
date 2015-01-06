@@ -32,11 +32,10 @@ Controller<{{className}}, {{idClassName}}>
 	}
 
 	@Override
-	public EntityManagerFactory getEntityManagerFactory()
-	{
+	public EntityManagerFactory getEntityManagerFactory() {
 		return emf;
 	}
-	
+
 	@Override
 {{{idSetterCode}}}
 	
@@ -51,21 +50,21 @@ Controller<{{className}}, {{idClassName}}>
 	}
 
 	@GET
-	@Path("/{{idPathExtension}}")
-	public {{className}} findMessage({{{pathParamDeclaration}}} {{idClassName}} aId ) throws Exception {
-		return find(aId);
+	@Path("{{idPathExtension}}")
+	public {{className}} findMessage({{{idParameters}}}) throws Exception {
+{{{idGenerateCode}}}return find({{singularIdName}});
 	}
 
 	@PUT
-	@Path("/{{idPathExtension}}")
-	public {{className}} updateModel({{{pathParamDeclaration}}} {{idClassName}} aId, {{className}} aMsg ) throws Exception {
-		return update(aId, aMsg);
+	@Path("{{idPathExtension}}")
+	public {{className}} updateModel({{{idParameters}}}, {{className}} aMsg ) throws Exception {
+{{{idGenerateCode}}}return update({{singularIdName}}, aMsg);
 	}
 
 	@DELETE
-	@Path("/{{idPathExtension}}")
-	public {{className}} deleteModel({{{pathParamDeclaration}}} {{idClassName}} aId ) throws Exception {
-		return delete(aId, this.getModelClass());
+	@Path("{{idPathExtension}}")
+	public {{className}} deleteModel({{{idParameters}}}) throws Exception {
+{{{idGenerateCode}}}return delete({{singularIdName}}, this.getModelClass());
 	}
 
 }
