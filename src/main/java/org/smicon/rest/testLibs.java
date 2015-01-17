@@ -1,8 +1,5 @@
 package org.smicon.rest;
 
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 
 public class testLibs {
 
@@ -12,16 +9,30 @@ public class testLibs {
 //		{
 //			f.setAccessible(true);
 //		}
-        BeanInfo info = Introspector.getBeanInfo( Bean.class, Introspector.USE_ALL_BEANINFO);
- 		for ( PropertyDescriptor pd : info.getPropertyDescriptors() )
-		{
-			System.out.println( pd.getName() );
+//        BeanInfo info = Introspector.getBeanInfo( Bean.class, Introspector.USE_ALL_BEANINFO);
+// 		for ( PropertyDescriptor pd : info.getPropertyDescriptors() )
+//		{
+//			System.out.println( pd.getName() );
+//		}
+		Class<?>[] clss = Bean.class.getDeclaredClasses();
+		
+		for(Class var : clss) {
+			System.out.println(var.getSimpleName());
+		}
+		
+		clss = testLibs.class.getDeclaredClasses();
+		
+		for(Class var : clss) {
+			System.out.println(var.getSimpleName());
 		}
 	}
 	
-	class Bean {
+	class Bean<Mean, Lean, Sean> {
 		public String A;
 		public int B;
+		public Mean m;
+		public Lean l;
+		public Sean s;
 		
 		public String getA() {
 			return A;
@@ -37,5 +48,11 @@ public class testLibs {
 		}
 		
 	}
+	
+	class Mean extends Bean {}
+
+	class Lean extends Mean {}
+
+	class Sean extends Lean {}
 
 }
