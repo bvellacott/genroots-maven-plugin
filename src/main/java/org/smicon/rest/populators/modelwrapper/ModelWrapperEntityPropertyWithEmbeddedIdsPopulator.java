@@ -1,15 +1,14 @@
 package org.smicon.rest.populators.modelwrapper;
 
-import org.smicon.rest.metas.EntityCollectionPropertyMeta;
 import org.smicon.rest.metas.EntityPropertyMeta;
 
-public class ModelWrapperEntityPropertyWithEmbeddedIdsPopulator 
+public class ModelWrapperEntityPropertyWithEmbeddedIdsPopulator
 extends
-ModelWrapperEntityPropertyWithCompositeIdsPopulator 
+ModelWrapperEntityPropertyWithCompositeIdsPopulator
 {
 
-	public ModelWrapperEntityPropertyWithEmbeddedIdsPopulator(
-			EntityPropertyMeta aEntityPropertyMeta) {
+	public ModelWrapperEntityPropertyWithEmbeddedIdsPopulator(EntityPropertyMeta aEntityPropertyMeta) throws Exception
+	{
 		super(aEntityPropertyMeta);
 	}
 

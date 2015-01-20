@@ -2,21 +2,15 @@ package org.smicon.rest.populators.modelwrapper;
 
 import java.beans.PropertyDescriptor;
 
-import org.smicon.rest.populators.abstracts.TemplatePopulator;
+import org.smicon.rest.populators.abstracts.ModelPropertyPopulator;
 
 public class ModelWrapperSimplePropertyPopulator 
 extends
-TemplatePopulator
+ModelPropertyPopulator
 {
 	
-	protected PropertyDescriptor propertyDescriptor;
-
 	public ModelWrapperSimplePropertyPopulator(PropertyDescriptor aPropertyDescriptor) {
-		this.propertyDescriptor = aPropertyDescriptor;
-	}
-	
-	public String getType() {
-		return this.propertyDescriptor.getPropertyType().getSimpleName();
+		super(aPropertyDescriptor);
 	}
 	
 	public String getGetterName() {
@@ -25,10 +19,6 @@ TemplatePopulator
 	
 	public String getSetterName() {
 		return this.propertyDescriptor.getWriteMethod().getName();
-	}
-	
-	public String getParameterName() {
-		return this.propertyDescriptor.getName();
 	}
 	
 }

@@ -1,7 +1,8 @@
 package org.smicon.rest.populators.modelwrapper;
 
-import org.smicon.rest.metas.EntityIdMeta;
+import org.smicon.rest.exceptions.IncorrectEntityStructureException;
 import org.smicon.rest.metas.EntityPropertyMeta;
+import org.smicon.rest.metas.ModelEntityMeta;
 
 public class ModelWrapperEntityPropertyWithSimpleIdsPopulator 
 extends
@@ -9,9 +10,15 @@ ModelWrapperSimplePropertyPopulator
 {
 	protected EntityPropertyMeta entityPropertyMeta;
 	
-	public ModelWrapperEntityPropertyWithSimpleIdsPopulator(EntityPropertyMeta aEntityPropertyMeta) {
+	public ModelWrapperEntityPropertyWithSimpleIdsPopulator(EntityPropertyMeta aEntityPropertyMeta) throws Exception {
 		super(aEntityPropertyMeta.getPropertyDescriptor());
 		this.entityPropertyMeta = aEntityPropertyMeta;
+		
+		if(!(this.entityPropertyMeta.getChildMeta() instanceof ModelEntityMeta))
+		{
+			throw new IncorrectEntityStructureException(
+				"The target type of a public entity relationship doesn't point to a valid Model entity. i.e The target entity is not annotated @Model.");
+		}
 	}
 	
 	public String getIdType() {

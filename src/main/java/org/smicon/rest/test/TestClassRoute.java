@@ -1,8 +1,9 @@
 package org.smicon.rest.test;
 
-import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ejb.Singleton;
 import javax.persistence.EntityManagerFactory;
@@ -14,9 +15,16 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
-import papu.mvc.Controller;
+import java.text.ParseException;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import papu.mvc.Controller;
+
+import org.smicon.rest.test.CompositeKey;
+import java.util.List;
+import org.smicon.rest.test.TestClassComposite;
+import org.smicon.rest.test.TestClassEmbedded;
 
 
 @Singleton
@@ -72,8 +80,14 @@ Controller<TestClass, Integer>
 
 	public static Object wrapAll(List<TestClass> aList) {
 		final ArrayList<TestClassWrapper> allWrapped = new ArrayList<TestClassWrapper>(aList.size());
-		for(int i = 0 ; i < aList.size(); i++) allWrapped.add(new TestClassWrapper((TestClass)aList.get(i))); 
+		for(int i = 0 ; i < aList.size(); i++) allWrapped.add(new TestClassWrapper(aList.get(i))); 
 		return new Object(){ @JsonProperty List<TestClassWrapper> testclasses = allWrapped; };
+	};
+	
+	public static Object wrapAll(Map<?, TestClass> aMap) {
+		final HashMap<Object, TestClassWrapper> allWrapped = new HashMap<Object, TestClassWrapper>(aMap.size());
+		for(Object key : aMap.keySet()) allWrapped.put(key, new TestClassWrapper(aMap.get(key))); 
+		return new Object(){ @JsonProperty Map<Object, TestClassWrapper> Messages = allWrapped; };
 	};
 	
 	public static Object wrap(final TestClass aResult) {

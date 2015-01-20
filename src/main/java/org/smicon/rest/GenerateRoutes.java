@@ -18,6 +18,7 @@ package org.smicon.rest;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.reflections.Reflections;
 import org.smicon.rest.metas.Metas;
 import org.smicon.rest.populators.RouteTemplatePopulator;
+import org.smicon.rest.populators.embermodel.EmberModelPopulator;
 
 import papu.annotations.Model;
 
@@ -56,20 +58,27 @@ AbstractMojo
 	/**
 	 * Location of the file.
 	 */
-	@Parameter(defaultValue = "${project.build.sourceDirectory}", property = "outputDir", required = true)
-	private File outputDir;
+	@Parameter(defaultValue = "${project.build.sourceDirectory}", property = "routeOutputDir", required = true)
+	private File routeOutputDir;
+
+	@Parameter(defaultValue = "src/main/webapp/js/models", property = "emberModelOutputDir", required = true)
+	private File emberModelOutputDir;
 
 	@Parameter
 	private String resourceRoot;
 	private String defaultResourceRoot = GenerateRoutes.class.getPackage().getName().replace('.', '/');
 
 	@Parameter(defaultValue = "RouteTemplate.mustache")
-	private String templateFile;
+	private String routeTemplateFile;
+
+	@Parameter(defaultValue = "EmberModel.mustache")
+	private String emberModelTemplateFile;
 
 	@Parameter(defaultValue = "Route")
 	private String routeClassPostfix;
 
-	private Mustache mustache;
+	private Mustache routeMustache;
+	private Mustache emberModelMustache;
 
 	@Parameter(defaultValue = "${session}", required = true)
 	private MavenSession session;
@@ -105,7 +114,7 @@ AbstractMojo
 			packageName = GenerateRoutes.class.getPackage().getName();
 		}
 		getLog().info("Using package: " + packageName);
-		getLog().info("Using output dir: " + outputDir);
+		getLog().info("Using output dir: " + routeOutputDir);
 
 		Metas.init(packageName);
 
@@ -116,18 +125,22 @@ AbstractMojo
 		}
 
 		getLog().info("Using classpath resource root: " + resourceRoot);
-		getLog().info("Using template file: " + templateFile);
+		getLog().info("Using route template file: " + routeTemplateFile);
+		getLog().info("Using ember model template file: " + emberModelTemplateFile);
 		getLog().info("Using route class postfix: " + routeClassPostfix);
 
 		mf = new DefaultMustacheFactory(resourceRoot);
-		mustache = mf.compile(templateFile);
+		routeMustache = mf.compile(routeTemplateFile);
+		emberModelMustache = mf.compile(emberModelTemplateFile);
 	}
 
 	public static void main(String[] args) throws MojoExecutionException
 	{
 		GenerateRoutes genRoots = new GenerateRoutes();
-		genRoots.outputDir = new File("src/main/java");
-		genRoots.templateFile = "RouteTemplate.mustache";
+		genRoots.routeOutputDir = new File("src/main/java");
+		genRoots.emberModelOutputDir = new File("src/main/webapp/js/models");
+		genRoots.routeTemplateFile = "RouteTemplate.mustache";
+		genRoots.emberModelTemplateFile = "EmberModel.mustache";
 		genRoots.routeClassPostfix = "Route";
 		genRoots.execute();
 	}
@@ -165,14 +178,32 @@ AbstractMojo
 
 		for (Class<?> m : aClasses)
 		{
-			RouteTemplatePopulator routeInstance = new RouteTemplatePopulator(m);
-
-			File routeClassFile = new File(this.outputDir.getAbsolutePath() + "/"
-			+ routeInstance.getPackageName().replace('.', '/') + "/" + routeInstance.getRouteClassName() + ".java");
-			mustache.execute(new FileWriter(routeClassFile), routeInstance).flush();
-			logBuilder.append("\tCreated route class file: " + routeClassFile + "\n");
+			this.generateRoute(m, logBuilder);
+			this.generateEmberModel(m, logBuilder);
 		}
 		this.getLog().info(logBuilder.toString());
 	}
 
+	private void generateRoute(Class<?> aModelClass, StringBuilder aLogBuilder) throws Exception
+	{
+		RouteTemplatePopulator populator = new RouteTemplatePopulator(aModelClass);
+
+		File routeClassFile = new File(this.routeOutputDir.getAbsolutePath() + "/"
+		+ populator.getPackageName().replace('.', '/') + "/" + populator.getRouteClassName() + ".java");
+		routeMustache.execute(new FileWriter(routeClassFile), populator).flush();
+		aLogBuilder.append("\tCreated route class file: " + routeClassFile + "\n");
+	}
+
+	private void generateEmberModel(Class<?> aModelClass, StringBuilder aLogBuilder) throws Exception
+	{
+		EmberModelPopulator populator = new EmberModelPopulator(aModelClass);
+
+		File emberModelDir = new File(this.emberModelOutputDir.getAbsolutePath() + "/");
+		if(!emberModelDir.exists()) 
+			emberModelDir.mkdirs();
+		
+		File emberModelFile = new File(this.emberModelOutputDir.getAbsolutePath() + "/" + populator.getClassName() + ".js");
+		emberModelMustache.execute(new FileWriter(emberModelFile), populator).flush();
+		aLogBuilder.append("\tCreated ember model file: " + emberModelFile + "\n");
+	}
 }

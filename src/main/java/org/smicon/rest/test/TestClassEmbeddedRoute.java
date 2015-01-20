@@ -2,6 +2,8 @@ package org.smicon.rest.test;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ejb.Singleton;
 import javax.persistence.EntityManagerFactory;
@@ -98,8 +100,14 @@ Controller<TestClassEmbedded, EmbeddableCompositeKey>
 
 	public static Object wrapAll(List<TestClassEmbedded> aList) {
 		final ArrayList<TestClassEmbeddedWrapper> allWrapped = new ArrayList<TestClassEmbeddedWrapper>(aList.size());
-		for(int i = 0 ; i < aList.size(); i++) allWrapped.add(new TestClassEmbeddedWrapper((TestClassEmbedded)aList.get(i))); 
+		for(int i = 0 ; i < aList.size(); i++) allWrapped.add(new TestClassEmbeddedWrapper(aList.get(i))); 
 		return new Object(){ @JsonProperty List<TestClassEmbeddedWrapper> embeddeds = allWrapped; };
+	};
+	
+	public static Object wrapAll(Map<?, TestClassEmbedded> aMap) {
+		final HashMap<Object, TestClassEmbeddedWrapper> allWrapped = new HashMap<Object, TestClassEmbeddedWrapper>(aMap.size());
+		for(Object key : aMap.keySet()) allWrapped.put(key, new TestClassEmbeddedWrapper(aMap.get(key))); 
+		return new Object(){ @JsonProperty Map<Object, TestClassEmbeddedWrapper> Messages = allWrapped; };
 	};
 	
 	public static Object wrap(final TestClassEmbedded aResult) {

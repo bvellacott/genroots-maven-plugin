@@ -1,7 +1,6 @@
 package org.smicon.rest.test;
 
 import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 
 import papu.annotations.Model;

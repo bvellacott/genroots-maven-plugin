@@ -2,6 +2,8 @@ package org.smicon.rest.test;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ejb.Singleton;
 import javax.persistence.EntityManagerFactory;
@@ -19,13 +21,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import papu.mvc.Controller;
 
+import org.smicon.rest.test.EmbeddableCompositeKey;
+import org.smicon.rest.test.CompositeKey;
+import java.util.Date;
+import org.smicon.rest.test.TestClass;
+import java.lang.String;
 import org.smicon.rest.test.TestClassComposite;
 import org.smicon.rest.test.TestClassEmbedded;
-import org.smicon.rest.test.EmbeddableCompositeKey;
-import java.util.Date;
-import java.lang.String;
-import org.smicon.rest.test.TestClass;
-import org.smicon.rest.test.CompositeKey;
 
 
 @Singleton
@@ -91,8 +93,14 @@ Controller<TestClassComposite, CompositeKey>
 
 	public static Object wrapAll(List<TestClassComposite> aList) {
 		final ArrayList<TestClassCompositeWrapper> allWrapped = new ArrayList<TestClassCompositeWrapper>(aList.size());
-		for(int i = 0 ; i < aList.size(); i++) allWrapped.add(new TestClassCompositeWrapper((TestClassComposite)aList.get(i))); 
+		for(int i = 0 ; i < aList.size(); i++) allWrapped.add(new TestClassCompositeWrapper(aList.get(i))); 
 		return new Object(){ @JsonProperty List<TestClassCompositeWrapper> testcclasses = allWrapped; };
+	};
+	
+	public static Object wrapAll(Map<?, TestClassComposite> aMap) {
+		final HashMap<Object, TestClassCompositeWrapper> allWrapped = new HashMap<Object, TestClassCompositeWrapper>(aMap.size());
+		for(Object key : aMap.keySet()) allWrapped.put(key, new TestClassCompositeWrapper(aMap.get(key))); 
+		return new Object(){ @JsonProperty Map<Object, TestClassCompositeWrapper> Messages = allWrapped; };
 	};
 	
 	public static Object wrap(final TestClassComposite aResult) {

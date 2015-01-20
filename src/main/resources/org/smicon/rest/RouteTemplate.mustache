@@ -80,7 +80,7 @@ Controller<{{className}}, {{idClassName}}>
 	public static Object wrapAll(Map<?, {{className}}> aMap) {
 		final HashMap<Object, {{className}}Wrapper> allWrapped = new HashMap<Object, {{className}}Wrapper>(aMap.size());
 		for(Object key : aMap.keySet()) allWrapped.put(key, new {{className}}Wrapper(aMap.get(key))); 
-		return new Object(){ @JsonProperty Map<Object, {{className}}Wrapper> Messages = allWrapped; };
+		return new Object(){ @JsonProperty Map<Object, {{className}}Wrapper> {{plural}} = allWrapped; };
 	};
 	
 	public static Object wrap(final {{className}} aResult) {
