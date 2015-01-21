@@ -1,0 +1,32 @@
+App.{{className}} = DS.Model.extend({
+	{{#simpleProperties}}
+	// Simple properties
+	{{#properties}}
+	{{parameterName}} : DS.attr('{{jsType}}'),
+	{{/properties}}
+	{{/simpleProperties}}
+	{{#entityPropertiesWithSimpleIds}}
+	// Entity properties with simple id's
+	{{#properties}}
+	{{parameterName}} : DS.belongsTo('{{targetTypeStringForm}}', {async : true}),
+	{{/properties}}
+	{{/entityPropertiesWithSimpleIds}}
+	{{#entityPropertiesWithEmbeddedIds}}
+	// Entity properties with embedded id's
+	{{#properties}}
+	{{parameterName}} : DS.belongsTo('{{targetTypeStringForm}}', {async : true}),
+	{{/properties}}
+	{{/entityPropertiesWithEmbeddedIds}}
+	{{#entityPropertiesWithCompositeIds}}
+	// Entity properties with composite id's
+	{{#properties}}
+	{{parameterName}} : DS.belongsTo('{{targetTypeStringForm}}', {async : true}),
+	{{/properties}}
+	{{/entityPropertiesWithCompositeIds}}
+	{{#entityCollectionProperties}}
+	// Entity collection properties
+	{{#properties}}
+	{{parameterName}} : DS.hasMany('{{targetTypeStringForm}}', {async : true}),
+	{{/properties}}
+	{{/entityCollectionProperties}}
+});
