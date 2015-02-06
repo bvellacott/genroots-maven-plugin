@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.smicon.rest</groupId>
-  <artifactId>genroots-maven-plugin</artifactId>
+  <artifactId>emberwire-maven-plugin</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
-  <name>genroots-maven-plugin Maven Plugin</name>
+  <name>emberwire-maven-plugin Maven Plugin</name>
 
   <!-- FIXME change it to the project's website -->
   <url>http://maven.apache.org</url>
@@ -130,7 +130,7 @@
         <artifactId>maven-plugin-plugin</artifactId>
         <version>3.2</version>
         <configuration>
-          <goalPrefix>genroots-maven-plugin</goalPrefix>
+          <goalPrefix>emberwire-maven-plugin</goalPrefix>
           <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
         </configuration>
         <executions>

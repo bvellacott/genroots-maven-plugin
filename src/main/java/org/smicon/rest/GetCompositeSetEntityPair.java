@@ -10,6 +10,7 @@ public class GetCompositeSetEntityPair
 extends 
 GetSetPair<Member, Method> {
 	
+	
 	public GetCompositeSetEntityPair(Member aGetter, Method aSetter, String aEntityVariableName, String aCompositeVariableName) throws IncorrectIdStructureException {
 		super(aGetter, aSetter, aEntityVariableName, aCompositeVariableName);
 	}
