@@ -15,20 +15,21 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
-import java.text.ParseException;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import papu.mvc.Controller;
 
 import org.smicon.rest.testentities.CompositeKey;
-import org.smicon.rest.testentities.TestClass;
-import org.smicon.rest.testentities.TestClassEmbedded;
-import java.lang.String;
+import java.lang.Class;
 import org.smicon.rest.testentities.TestClassComposite;
 import org.smicon.rest.testentities.EmbeddableCompositeKey;
+import org.smicon.rest.testentities.EmbeddableCompositeKey;
+import org.smicon.rest.testentities.TestClass;
+import java.lang.String;
+import org.smicon.rest.testentities.TestClassEmbedded;
+import java.lang.Class;
 import java.util.Date;
-
+import org.smicon.rest.testentities.CompositeKey;
 
 @Singleton
 @Path("testcclasses")
@@ -50,117 +51,125 @@ Controller<TestClassComposite, CompositeKey>
 		return emf;
 	}
 
-	@POST
-	@Path("/{key1}::{key2}")
-	public Object create(@PathParam("key1") int key1, @PathParam("key2") int key2, TestClassCompositeWrap aWrap) throws Exception {
-		TestClassCompositeWrapper aModel = aWrap.testClassComposite;
-		aModel.setKey1(key1);
-		aModel.setKey2(key2);
-		return wrap(createModel(aModel.wrapped));
-	}
-
 	@GET
 	public Object findAll() throws Exception {
 		return wrapAll(findAllModels());
 	}
 
+	@POST
+	@Path("/{key1}::{key2}")
+	public TestClassCompositeOW create(@PathParam("key1") int key1, @PathParam("key2") int key2, TestClassCompositeOW aModelOW) throws Exception {
+		TestClassComposite aModel = aModelOW.unwrap();
+		aModel.setKey1(key1);
+		aModel.setKey2(key2);
+		
+		return wrap(createModel(aModel));
+	}
+
 	@GET
 	@Path("/{key1}::{key2}")
-	public Object find(@PathParam("key1") int key1, @PathParam("key2") int key2) throws Exception {
+	public TestClassCompositeOW find(@PathParam("key1") int key1, @PathParam("key2") int key2) throws Exception {
 		CompositeKey id = new CompositeKey();
 		id.key1 = key1;
 		id.key2 = key2;
-
 		return wrap(findModel(id));
 	}
 
 	@PUT
 	@Path("/{key1}::{key2}")
-	public Object update(@PathParam("key1") int key1, @PathParam("key2") int key2, TestClassCompositeWrap aWrap) throws Exception {
-		TestClassCompositeWrapper aModel = aWrap.testClassComposite;
+	public TestClassCompositeOW update(@PathParam("key1") int key1, @PathParam("key2") int key2, TestClassCompositeOW aModelOW) throws Exception {
+		TestClassComposite aModel = aModelOW.unwrap();
 		aModel.setKey1(key1);
 		aModel.setKey2(key2);
-		return wrap(updateModel(aModel.wrapped));
+
+		return wrap(updateModel(aModel));
 	}
 
 	@DELETE
 	@Path("/{key1}::{key2}")
-	public Object delete(@PathParam("key1") int key1, @PathParam("key2") int key2) throws Exception {
+	public TestClassCompositeOW delete(@PathParam("key1") int key1, @PathParam("key2") int key2) throws Exception {
 		CompositeKey id = new CompositeKey();
 		id.key1 = key1;
 		id.key2 = key2;
-
 		return wrap(deleteModel(id));
 	}
 
 	public static Object wrapAll(List<TestClassComposite> aList) {
-		final ArrayList<TestClassCompositeWrapper> allWrapped = new ArrayList<TestClassCompositeWrapper>(aList.size());
-		for(int i = 0 ; i < aList.size(); i++) allWrapped.add(new TestClassCompositeWrapper(aList.get(i))); 
-		return new Object(){ @JsonProperty List<TestClassCompositeWrapper> testcclasses = allWrapped; };
+		final ArrayList<TestClassCompositeIW> allWrapped = new ArrayList();
+		for(int i = 0 ; i < aList.size(); i++) allWrapped.add(new TestClassCompositeIW(aList.get(i))); 
+		return new Object(){ @JsonProperty List<TestClassCompositeIW> testcclasses = allWrapped; };
 	};
 	
 	public static Object wrapAll(Map<?, TestClassComposite> aMap) {
-		final HashMap<Object, TestClassCompositeWrapper> allWrapped = new HashMap<Object, TestClassCompositeWrapper>(aMap.size());
-		for(Object key : aMap.keySet()) allWrapped.put(key, new TestClassCompositeWrapper(aMap.get(key))); 
-		return new Object(){ @JsonProperty Map<Object, TestClassCompositeWrapper> testcclasses = allWrapped; };
+		final HashMap<Object, TestClassCompositeIW> allWrapped = new HashMap();
+		for(Object key : aMap.keySet()) allWrapped.put(key, new TestClassCompositeIW(aMap.get(key))); 
+		return new Object(){ @JsonProperty Map<Object, TestClassCompositeIW> testcclasses = allWrapped; };
 	};
 	
-	public static TestClassCompositeWrap wrap(final TestClassComposite aResult) {
-		return new TestClassCompositeWrap(aResult);
+	public static TestClassCompositeOW wrap(final TestClassComposite aResult) {
+		return new TestClassCompositeOW(aResult);
 	}
 	
-	static class TestClassCompositeWrap {
-		@JsonProperty TestClassCompositeWrapper testClassComposite;
+	static class TestClassCompositeOW {
+		@JsonProperty TestClassCompositeIW testclasscomposite;
 		
-		public TestClassCompositeWrap() { this(new TestClassComposite()); };
-		public TestClassCompositeWrap(TestClassComposite aWrappable) { testClassComposite = new TestClassCompositeWrapper(aWrappable); };
+		public TestClassCompositeOW() { this(new TestClassComposite()); };
+		public TestClassCompositeOW(TestClassComposite aWrappable) { testclasscomposite = new TestClassCompositeIW(aWrappable); };
+		public TestClassComposite unwrap() { return testclasscomposite.unwrap(); }
 	}
 	
-	static class TestClassCompositeWrapper {
-		TestClassComposite wrapped;
+	// Link routes
+	public static class TestClassCompositeIW {
+		TestClassComposite testclasscomposite;
 		
-		public TestClassCompositeWrapper() { this(new TestClassComposite()); }
-		public TestClassCompositeWrapper(TestClassComposite aWrapped) { wrapped = aWrapped; }
+		public TestClassCompositeIW() { this(new TestClassComposite()); }
+		public TestClassCompositeIW(TestClassComposite aWrappable) { testclasscomposite = aWrappable; }
+
+		public TestClassComposite unwrap() { return testclasscomposite; }
 
 		// Simple properties
-		public int getKey1() { return wrapped.getKey1(); }
-		public void setKey1(int key1) { wrapped.setKey1(key1); }
-		public int getKey2() { return wrapped.getKey2(); }
-		public void setKey2(int key2) { wrapped.setKey2(key2); }
-		// Entity properties with simple id's
-		public int getSimple() { return wrapped.getSimple().getId1(); }
-		public void setSimple(int id) {
-			TestClass entity = new TestClass();
-			entity.setId1(id);
-			wrapped.setSimple(entity);
+		public int getKey1() { return testclasscomposite.getKey1(); }
+		public void setKey1(int key1) { testclasscomposite.setKey1(key1); }
+		public int getKey2() { return testclasscomposite.getKey2(); }
+		public void setKey2(int key2) { testclasscomposite.setKey2(key2); }
+		// Model properties with simple id's
+		public int getSimple() { return testclasscomposite.getSimple().getId1(); }
+		public void setSimple(int id1) {
+			TestClass simple = new TestClass();
+			simple.setId1(id1);
+			testclasscomposite.setSimple(simple);
 		}
-		// Entity properties with embedded id's
-		public String getEmbedded() { 
-			EmbeddableCompositeKey id = wrapped.getEmbedded().getEmbId();
-			return (new StringBuilder()).append("").append(id.emKey1).append("::").append(id.emKey2).append("::").append(id.emKey3).toString();
+		// Model properties with embedded id's
+		public String getEmbedded() {
+			EmbeddableCompositeKey embId = testclasscomposite.getEmbedded().getEmbId();
+			return (new StringBuilder()).append(embId.emKey1).append("::").append(embId.emKey2).append("::").append(embId.emKey3).toString();
 		}
-		public void setEmbedded(String composedId) throws ParseException {
-			String parts[] = composedId.split("::");
-			EmbeddableCompositeKey id = new EmbeddableCompositeKey();
-			id.emKey1 = parse(parts[0], int.class);
-			id.emKey2 = parse(parts[1], String.class);
-			id.emKey3 = parse(parts[2], java.util.Date.class);
-			TestClassEmbedded entity = new TestClassEmbedded();
-			entity.setEmbId(id);
-			wrapped.setEmbedded(entity);
+		public void setEmbedded(String embIdSerial) throws Exception {
+			String[] parts = embIdSerial.split("::");
+			EmbeddableCompositeKey embId = new EmbeddableCompositeKey();
+			embId.emKey1 = parse(parts[0], int.class);
+			embId.emKey2 = parse(parts[1], String.class);
+			embId.emKey3 = parse(parts[2], Date.class);
+			TestClassEmbedded embedded = new TestClassEmbedded();
+			embedded.setEmbId(embId);
+			testclasscomposite.setEmbedded(embedded);
 		}
-		// Entity properties with composite id's
+		// Model properties with composite id's
 		public String getComposite() { 
-			TestClassComposite entity = wrapped.getComposite();
-			return (new StringBuilder()).append("").append(entity.getKey1()).append("::").append(entity.getKey2()).toString(); 
+			TestClassComposite composite = testclasscomposite.getComposite();
+			return (new StringBuilder()).append(composite.getKey1()).append("::").append(composite.getKey2()).toString(); 
 		}
-		public void setComposite(String composedId) throws ParseException {
-			String[] parts = composedId.split("::");
-			TestClassComposite entity = new TestClassComposite();
-			entity.setKey1(parse(parts[0], int.class));
-			entity.setKey2(parse(parts[1], int.class));
-			wrapped.setComposite(entity);
+		public void setComposite(String id) throws Exception {
+			String[] parts = id.split("::");
+			TestClassComposite composite = new TestClassComposite();
+			composite.setKey1(parse(parts[0], int.class));
+			composite.setKey2(parse(parts[1], int.class));
+			testclasscomposite.setComposite(composite);
 		}
+		// Model collection properties
+		
+		// Links for model collection properties - required by the ember data format
+		@JsonProperty Object links = new Object() { 
+		};
 	}
-
 }

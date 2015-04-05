@@ -15,17 +15,16 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
-import java.text.ParseException;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import papu.mvc.Controller;
 
+import org.smicon.rest.testentities.TestClassComposite;
+import org.smicon.rest.testentities.TestClassEmbedded;
+import java.util.ArrayList;
 import org.smicon.rest.testentities.CompositeKey;
 import java.util.List;
-import org.smicon.rest.testentities.TestClassEmbedded;
-import org.smicon.rest.testentities.TestClassComposite;
-
+import static org.smicon.rest.testentities.TestClassEmbeddedController.*;
 
 @Singleton
 @Path("testclasses")
@@ -47,60 +46,63 @@ Controller<TestClass, Integer>
 		return emf;
 	}
 
-	@POST
-	@Path("/{id1}")
-	public Object create(@PathParam("id1") int id1, TestClassWrap aWrap) throws Exception {
-		TestClassWrapper aModel = aWrap.testClass;
-		aModel.setId1(id1);
-		return wrap(createModel(aModel.wrapped));
-	}
-
 	@GET
 	public Object findAll() throws Exception {
 		return wrapAll(findAllModels());
 	}
 
+	@POST
+	@Path("/{id1}")
+	public TestClassOW create(@PathParam("id1") int id1, TestClassOW aModelOW) throws Exception {
+		TestClass aModel = aModelOW.unwrap();
+		aModel.setId1(id1);
+		
+		return wrap(createModel(aModel));
+	}
+
 	@GET
 	@Path("/{id1}")
-	public Object find(@PathParam("id1") int id1) throws Exception {
+	public TestClassOW find(@PathParam("id1") int id1) throws Exception {
 		return wrap(findModel(id1));
 	}
 
 	@PUT
 	@Path("/{id1}")
-	public Object update(@PathParam("id1") int id1, TestClassWrap aWrap) throws Exception {
-		TestClassWrapper aModel = aWrap.testClass;
+	public TestClassOW update(@PathParam("id1") int id1, TestClassOW aModelOW) throws Exception {
+		TestClass aModel = aModelOW.unwrap();
 		aModel.setId1(id1);
-		return wrap(updateModel(aModel.wrapped));
+
+		return wrap(updateModel(aModel));
 	}
 
 	@DELETE
 	@Path("/{id1}")
-	public Object delete(@PathParam("id1") int id1) throws Exception {
+	public TestClassOW delete(@PathParam("id1") int id1) throws Exception {
 		return wrap(deleteModel(id1));
 	}
 
 	public static Object wrapAll(List<TestClass> aList) {
-		final ArrayList<TestClassWrapper> allWrapped = new ArrayList<TestClassWrapper>(aList.size());
-		for(int i = 0 ; i < aList.size(); i++) allWrapped.add(new TestClassWrapper(aList.get(i))); 
-		return new Object(){ @JsonProperty List<TestClassWrapper> testclasses = allWrapped; };
+		final ArrayList<TestClassIW> allWrapped = new ArrayList();
+		for(int i = 0 ; i < aList.size(); i++) allWrapped.add(new TestClassIW(aList.get(i))); 
+		return new Object(){ @JsonProperty List<TestClassIW> testclasses = allWrapped; };
 	};
 	
 	public static Object wrapAll(Map<?, TestClass> aMap) {
-		final HashMap<Object, TestClassWrapper> allWrapped = new HashMap<Object, TestClassWrapper>(aMap.size());
-		for(Object key : aMap.keySet()) allWrapped.put(key, new TestClassWrapper(aMap.get(key))); 
-		return new Object(){ @JsonProperty Map<Object, TestClassWrapper> testclasses = allWrapped; };
+		final HashMap<Object, TestClassIW> allWrapped = new HashMap();
+		for(Object key : aMap.keySet()) allWrapped.put(key, new TestClassIW(aMap.get(key))); 
+		return new Object(){ @JsonProperty Map<Object, TestClassIW> testclasses = allWrapped; };
 	};
 	
-	public static TestClassWrap wrap(final TestClass aResult) {
-		return new TestClassWrap(aResult);
+	public static TestClassOW wrap(final TestClass aResult) {
+		return new TestClassOW(aResult);
 	}
 	
-	static class TestClassWrap {
-		@JsonProperty TestClassWrapper testClass;
+	static class TestClassOW {
+		@JsonProperty TestClassIW testclass;
 		
-		public TestClassWrap() { this(new TestClass()); };
-		public TestClassWrap(TestClass aWrappable) { testClass = new TestClassWrapper(aWrappable); };
+		public TestClassOW() { this(new TestClass()); };
+		public TestClassOW(TestClass aWrappable) { testclass = new TestClassIW(aWrappable); };
+		public TestClass unwrap() { return testclass.unwrap(); }
 	}
 	
 	// Link routes
@@ -109,35 +111,43 @@ Controller<TestClass, Integer>
 	public Object getEmbeddeds(@PathParam("id1") int id1) throws Exception {
 		return TestClassEmbeddedController.wrapAll(findModel(id1).getEmbeddeds());
 	}
-
-	static class TestClassWrapper {
-		TestClass wrapped;
+	
+	public static class TestClassIW {
+		TestClass testclass;
 		
-		// Routes for entity collection properties
+		public TestClassIW() { this(new TestClass()); }
+		public TestClassIW(TestClass aWrappable) { testclass = aWrappable; }
+
+		public TestClass unwrap() { return testclass; }
+
+		// Simple properties
+		public int getId1() { return testclass.getId1(); }
+		public void setId1(int id1) { testclass.setId1(id1); }
+		// Model properties with simple id's
+		// Model properties with embedded id's
+		// Model properties with composite id's
+		public String getCompost() { 
+			TestClassComposite compost = testclass.getCompost();
+			return (new StringBuilder()).append(compost.getKey1()).append("::").append(compost.getKey2()).toString(); 
+		}
+		public void setCompost(String id) throws Exception {
+			String[] parts = id.split("::");
+			TestClassComposite compost = new TestClassComposite();
+			compost.setKey1(parse(parts[0], int.class));
+			compost.setKey2(parse(parts[1], int.class));
+			testclass.setCompost(compost);
+		}
+		// Model collection properties
+		public void setEmbeddeds(List<TestClassEmbeddedIW> TestClassEmbeddeds) { 
+			List<TestClassEmbedded> embeddeds = new java.util.ArrayList();
+			for(TestClassEmbeddedIW TestClassEmbeddedvar : TestClassEmbeddeds) 
+				embeddeds.add(TestClassEmbeddedvar.unwrap());
+			testclass.setEmbeddeds(embeddeds); 
+		}
+		
+		// Links for model collection properties - required by the ember data format
 		@JsonProperty Object links = new Object() { 
 			@JsonProperty String embeddeds = "embeddeds";
 		};
-		
-		public TestClassWrapper() { this(new TestClass()); }
-		public TestClassWrapper(TestClass aWrapped) { wrapped = aWrapped; }
-
-		// Simple properties
-		public int getId1() { return wrapped.getId1(); }
-		public void setId1(int id1) { wrapped.setId1(id1); }
-		// Entity properties with composite id's
-		public String getCompost() { 
-			TestClassComposite entity = wrapped.getCompost();
-			return (new StringBuilder()).append("").append(entity.getKey1()).append("::").append(entity.getKey2()).toString(); 
-		}
-		public void setCompost(String composedId) throws ParseException {
-			String[] parts = composedId.split("::");
-			TestClassComposite entity = new TestClassComposite();
-			entity.setKey1(parse(parts[0], int.class));
-			entity.setKey2(parse(parts[1], int.class));
-			wrapped.setCompost(entity);
-		}
-		// Entity collection properties
-		public void setEmbeddeds(List embeddeds) { wrapped.setEmbeddeds(embeddeds); }
 	}
-
 }

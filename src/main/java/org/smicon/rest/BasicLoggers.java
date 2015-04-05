@@ -1,17 +1,17 @@
 package org.smicon.rest;
 
-import org.smicon.rest.data.logging.DefaultLoggingConfiguration;
-import org.smicon.rest.data.logging.LoggingConfigurationI;
-import org.smicon.rest.data.logging.MutableLoggingConfiguration;
-import org.smicon.rest.data.logging.MutableLoggingConfigurationI;
-import org.smicon.rest.instances.logging.LoggerI;
-import org.smicon.rest.instances.logging.basiclogger.BasicLogger;
-import org.smicon.rest.instances.logging.basiclogger.MutableBasicLogger;
-import org.smicon.rest.instances.logging.silentLogger.SilentLogger;
+import org.smicon.rest.logging.DefaultLoggingConfiguration;
+import org.smicon.rest.logging.LoggerI;
+import org.smicon.rest.logging.LoggingConfigurationI;
+import org.smicon.rest.logging.basiclogger.BasicLogger;
+import org.smicon.rest.logging.basiclogger.MutableBasicLogger;
+import org.smicon.rest.logging.silentLogger.SilentLogger;
 
 
 public final class BasicLoggers
 {
+	public static final LoggingConfigurationI default_logging_configuration = new DefaultLoggingConfiguration();
+	
 	private static final LoggerI defaultInstance = new BasicLogger();
 	private static final LoggerI silentInstance = new SilentLogger();
 	
@@ -32,11 +32,11 @@ public final class BasicLoggers
 	
 	public static LoggingConfigurationI getDefaultConfiguration()
 	{
-		return DefaultLoggingConfiguration.getInstance();
+		return default_logging_configuration;
 	}
 	
-	public static MutableLoggingConfigurationI newConfiguration()
+	public static LoggingConfigurationI newConfiguration()
 	{
-		return new MutableLoggingConfiguration();
+		return new DefaultLoggingConfiguration();
 	}
 }

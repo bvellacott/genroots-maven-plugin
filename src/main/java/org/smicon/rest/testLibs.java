@@ -1,7 +1,18 @@
 package org.smicon.rest;
 
+import java.util.function.Function;
+
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+
+import org.smicon.rest.emberwiring.metas.ModelValidationDataI;
+
 
 public class testLibs {
+	
+	enum _enum {
+		a,b,c;
+	}
 
 	public static void main(String[] args) throws Exception {
 //		PropertyDescriptor pDesc = new PropertyDescriptor("A", Bean.class);
@@ -25,6 +36,42 @@ public class testLibs {
 		for(Class var : clss) {
 			System.out.println(var.getSimpleName());
 		}
+		
+//		SwingUtilities.invokeLater(new Runnable() {
+//			@Override
+//			public void run()
+//			{
+//				SwingWorker sw;
+//				for(int i = 0; i < 100000; i++) {
+//					sw = new SwingWorker() {
+//						
+//						@Override
+//						protected Object doInBackground() throws Exception
+//						{
+//							System.out.println("_enum is enumeration = " + _enum.class.isEnum());
+//							
+//							System.out.println(ModelValidationDataI.default_singular_parameter_types);
+//							
+//							return null;
+//						}
+//					};
+//					
+//					sw.execute();
+//				}
+//			}
+//		});
+		
+		Function<String, String> f1 = new Function<String, String>() {
+
+			@Override
+			public String apply(String t)
+			{
+				return "f1 -> " + t;
+			}};
+			
+		Function f2 = (lambda) -> "f2 -> " + ((Function<String, String>) lambda).apply("Hello!");
+		
+		System.out.println(f2.apply(f1));
 	}
 	
 	class Bean<Mean, Lean, Sean> {

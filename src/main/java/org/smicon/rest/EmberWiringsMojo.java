@@ -25,10 +25,13 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.smicon.rest.data.modelmeta.Metas;
-import org.smicon.rest.data.wiring.MutableWiringConfigurationI;
-import org.smicon.rest.data.wiring.WiringConfigurationI;
-import org.smicon.rest.instances.logging.mavenplugin.MavenPluginLoggerWrapper;
+import org.smicon.rest.emberwiring.controller.ControllerWiringConfigurationI;
+import org.smicon.rest.emberwiring.embermodel.EmberModelWiringConfigurationI;
+import org.smicon.rest.emberwiring.general.Builders.Builders;
+import org.smicon.rest.emberwiring.wiring.WiringConfigurationBuilder;
+import org.smicon.rest.emberwiring.wiring.WiringConfigurationI;
+import org.smicon.rest.emberwiring.wiring.WiringFunctions;
+import org.smicon.rest.logging.mavenplugin.MavenPluginLoggerWrapper;
 
 /**
  * Goal which generates controllers and equivalent Ember.js models for EJB Entities 
@@ -64,89 +67,72 @@ AbstractMojo
 	@Parameter(defaultValue = "${session}", required = true)
 	private MavenSession session;
 	
-	private WiringConfigurationI wiringConfiguration;
-
 	@Parameter(property = "project.compileClasspathElements", required = true, readonly = true)
 	private List<String> classpathElements;
 
 	private String packageName;
+	
+	WiringConfigurationI configuration;
 
 	private void init() throws Exception
 	{
-		MutableWiringConfigurationI config = EmberWirings.newConfiguration();
-		config.setLogger(new MavenPluginLoggerWrapper(this.getLog()));
-
+		MavenPluginLoggerWrapper logger = new MavenPluginLoggerWrapper(this.getLog());
+		
 		if (session != null)
 		{
 			packageName = session.getCurrentProject().getGroupId();
 		}
 		else
 		{
-			config.getLogger().info("The maven session object is null!!");
+			logger.info("The maven session object is null!!");
 			packageName = EmberWiringsMojo.class.getPackage().getName();
 		}
-		
-		config.setPackageName(packageName);
+		if(resourceRoot == null)
+		{
+			resourceRoot = "/" + packageName.replace('.', '/');
+		}
+		WiringConfigurationBuilder configBuilder = Builders.WiringConfiguration(resourceRoot, packageName).
+			withLogger(logger);
 		
 		if(classpathElements != null)
-		{
-			config.setCompiledClasspathElements(classpathElements);
-		}
+			configBuilder.withClassPathElements(classpathElements);
 		
 		if(controllerOutputDirectory != null)
-		{
-			config.setControllerOutputDirectory(controllerOutputDirectory);
-		}
+			configBuilder.withControllerOutputDirectory(controllerOutputDirectory);
 
 		if(emberModelOutputDirectory != null)
-		{
-			config.setEmberModelOutputDirectory(emberModelOutputDirectory);
-		}
-
-		if (this.resourceRoot != null)
-		{
-			config.setResourceRoot(this.resourceRoot);
-		}
+			configBuilder.withEmberModelOutputDirectory(emberModelOutputDirectory);
 
 		if(controllerTemplateFileName != null)
-		{
-			config.setControllerTemplateFileName(controllerTemplateFileName);
-		}
+			configBuilder.withControllerTemplateFileName(controllerTemplateFileName);
 		
 		if(emberModelTemplateFileName != null)
-		{
-			config.setEmberModelTemplateFileName(emberModelTemplateFileName);
-		}
+			configBuilder.withEmberModelTemplateFileName(emberModelTemplateFileName);
 		
 		if(controllerClassPostfix != null)
-		{
-			config.setControllerClassPostfix(controllerClassPostfix);
-		}
+			configBuilder.withControllerClassPostfix(controllerClassPostfix);
 		
-		config.getLogger().info("Using package: " + config.getPackageName());
-		config.getLogger().info("Using controller output dir: " + config.getControllerOutputDirectory());
-		config.getLogger().info("Using ember model output dir: " + config.getControllerOutputDirectory());
-		config.getLogger().info("Using classpath resource root: " + config.getResourceRoot());
-		config.getLogger().info("Using controller template file: " + config.getControllerTemplateFileName());
-		config.getLogger().info("Using ember model template file: " + config.getEmberModelTemplateFileName());
-		config.getLogger().info("Using controller class postfix: " + config.getControllerClassPostfix());
+		configuration = configBuilder.build();
 		
-		this.wiringConfiguration = config;
-		Metas.init(this.wiringConfiguration);
-
+		ControllerWiringConfigurationI controllerConfig = configuration.getControllerWiringConfiguration();
+		EmberModelWiringConfigurationI emberModelConfig = configuration.getEmberModelWiringConfiguration();
+		
+		logger.info("Using package: " + packageName);
+		logger.info("Using controller output dir: " + controllerConfig.getOutputDirectory());
+		logger.info("Using ember model output dir: " + emberModelConfig.getOutputDirectory());
+		logger.info("Using classpath resource root: " + resourceRoot);
+		logger.info("Using controller template file: " + controllerConfig.getTemplateFileName());
+		logger.info("Using ember model template file: " + emberModelConfig.getTemplateFileName());
+		logger.info("Using controller class postfix: " + controllerConfig.getClassPostfix());
 	}
 
 	@Override
 	public void execute() throws MojoExecutionException
 	{
-		try
-		{
+		try {
 			init();
-			
-			EmberWirings.wire(this.wiringConfiguration);
-		}
-		catch (Exception e)
-		{
+			WiringFunctions.wire(configuration);
+		}catch (Exception e) {
 			throw new MojoExecutionException("Failed to generate controllers from source", e);
 		}
 	}

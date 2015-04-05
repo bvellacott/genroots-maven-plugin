@@ -15,27 +15,27 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
-import java.text.ParseException;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import papu.mvc.Controller;
 
-{{{imports}}}
+{{#imports}}
+import {{name}};
+{{/imports}}
 
 @Singleton
 @Path("{{plural}}")
-public class {{className}}{{controllerClassPostfix}}
+public class {{controllerType}}
 extends
-Controller<{{className}}, {{idClassName}}>
+Controller<{{modelType}}, {{wrappedIdType}}>
 {
 
 	@PersistenceUnit(unitName = "{{persistenceUnitName}}")
 	private EntityManagerFactory emf;
 	
 	@Override
-	public Class<{{className}}> getModelClass() {
-		return {{className}}.class;
+	public Class<{{modelType}}> getModelClass() {
+		return {{modelType}}.class;
 	}
 
 	@Override
@@ -43,150 +43,255 @@ Controller<{{className}}, {{idClassName}}>
 		return emf;
 	}
 
-	@POST{{{createRouteIdPathExtension}}}
-	public Object create({{{createRouteIdParameters}}}{{className}}Wrap aWrap) throws Exception {
-		{{className}}Wrapper {{modelVariableName}} = aWrap.{{singular}};
-{{{setModelIdsOmitGeneratedCode}}}return wrap(createModel({{modelVariableName}}.wrapped));
-	}
-
 	@GET
 	public Object findAll() throws Exception {
 		return wrapAll(findAllModels());
 	}
 
+	@POST
+	@Path("{{{nonGeneratedIdPath}}}")
+	public {{modelOuterWrapperType}} create({{{nonGeneratedIdMethodParameters}}}, {{modelOuterWrapperType}} {{outerWrapperVariableName}}) throws Exception {
+		{{modelType}} {{modelVariableName}} = {{outerWrapperVariableName}}.unwrap();
+		{{#simple}}
+		{{#nonGeneratedIdProperty}}
+		{{modelVariableName}}.{{setterName}}({{idPropertyName}});
+		{{/nonGeneratedIdProperty}}
+		{{/simple}}
+		{{#embedded}}
+		{{idType}} {{idName}} = new {{idType}}();
+		{{#nonGeneratedIdProperties}}
+		{{#setter}}
+		{{idName}}.{{setterName}}({{idPropertyName}});
+		{{/setter}}
+		{{#field}}
+		{{idName}}.{{idPropertyName}} = {{idPropertyName}};
+		{{/field}}
+		{{/nonGeneratedIdProperties}}
+		{{modelVariableName}}.{{setterName}}({{idName}});
+		{{/embedded}}
+		{{#composite}}
+		{{#nonGeneratedIdProperties}}
+		{{modelVariableName}}.{{setterName}}({{idPropertyName}});
+		{{/nonGeneratedIdProperties}}
+		{{/composite}}
+		
+		return wrap(createModel({{modelVariableName}}));
+	}
+
 	@GET
-	@Path("{{idPathExtension}}")
-	public Object find({{{idParameters}}}) throws Exception {
-{{{idGenerateCode}}}return wrap(findModel({{singularIdName}}));
+	@Path("{{{idPath}}}")
+	public {{modelOuterWrapperType}} find({{{idMethodParameters}}}) throws Exception {
+		{{#simple}}
+		{{#idProperty}}
+		return wrap(findModel({{idPropertyName}}));
+		{{/idProperty}}
+		{{/simple}}
+		{{#embedded}}
+		{{idType}} {{idName}} = new {{idType}}();
+		{{#idProperties}}
+		{{#setter}}
+		{{idName}}.{{setterName}}({{idPropertyName}});
+		{{/setter}}
+		{{#field}}
+		{{idName}}.{{idPropertyName}} = {{idPropertyName}};
+		{{/field}}
+		{{/idProperties}}
+		return wrap(findModel({{idName}}));
+		{{/embedded}}
+		{{#composite}}
+		{{idType}} {{idName}} = new {{idType}}();
+		{{#idProperties}}
+		{{#idSetter}}
+		{{idName}}.{{setterName}}({{idPropertyName}});
+		{{/idSetter}}
+		{{#idField}}
+		{{idName}}.{{idPropertyName}} = {{idPropertyName}};
+		{{/idField}}
+		{{/idProperties}}
+		return wrap(findModel({{idName}}));
+		{{/composite}}
 	}
 
 	@PUT
-	@Path("{{idPathExtension}}")
-	public Object update({{{idParameters}}}, {{className}}Wrap aWrap) throws Exception {
-		{{className}}Wrapper {{modelVariableName}} = aWrap.{{singular}};
-{{{setModelIdsCode}}}return wrap(updateModel({{modelVariableName}}.wrapped));
+	@Path("{{{idPath}}}")
+	public {{modelOuterWrapperType}} update({{{idMethodParameters}}}, {{modelOuterWrapperType}} {{outerWrapperVariableName}}) throws Exception {
+		{{modelType}} {{modelVariableName}} = {{outerWrapperVariableName}}.unwrap();
+		{{#simple}}
+		{{#idProperty}}
+		{{modelVariableName}}.{{setterName}}({{idPropertyName}});
+		{{/idProperty}}
+		{{/simple}}
+		{{#embedded}}
+		{{idType}} {{idName}} = new {{idType}}();
+		{{#idProperties}}
+		{{#setter}}
+		{{idName}}.{{setterName}}({{idPropertyName}});
+		{{/setter}}
+		{{#field}}
+		{{idName}}.{{idPropertyName}} = {{idPropertyName}};
+		{{/field}}
+		{{/idProperties}}
+		{{modelVariableName}}.{{setterName}}({{idName}});
+		{{/embedded}}
+		{{#composite}}
+		{{#idProperties}}
+		{{modelVariableName}}.{{setterName}}({{idPropertyName}});
+		{{/idProperties}}
+		{{/composite}}
+
+		return wrap(updateModel({{modelVariableName}}));
 	}
 
 	@DELETE
-	@Path("{{idPathExtension}}")
-	public Object delete({{{idParameters}}}) throws Exception {
-{{{idGenerateCode}}}return wrap(deleteModel({{singularIdName}}));
+	@Path("{{{idPath}}}")
+	public {{modelOuterWrapperType}} delete({{{idMethodParameters}}}) throws Exception {
+		{{#simple}}
+		{{#idProperty}}
+		return wrap(deleteModel({{idPropertyName}}));
+		{{/idProperty}}
+		{{/simple}}
+		{{#embedded}}
+		{{idType}} {{idName}} = new {{idType}}();
+		{{#idProperties}}
+		{{#setter}}
+		{{idName}}.{{setterName}}({{idPropertyName}});
+		{{/setter}}
+		{{#field}}
+		{{idName}}.{{idPropertyName}} = {{idPropertyName}};
+		{{/field}}
+		{{/idProperties}}
+		return wrap(deleteModel({{idName}}));
+		{{/embedded}}
+		{{#composite}}
+		{{idType}} {{idName}} = new {{idType}}();
+		{{#idProperties}}
+		{{#idSetter}}
+		{{idName}}.{{setterName}}({{idPropertyName}});
+		{{/idSetter}}
+		{{#idField}}
+		{{idName}}.{{idPropertyName}} = {{idPropertyName}};
+		{{/idField}}
+		{{/idProperties}}
+		return wrap(deleteModel({{idName}}));
+		{{/composite}}
 	}
 
-	public static Object wrapAll(List<{{className}}> aList) {
-		final ArrayList<{{className}}Wrapper> allWrapped = new ArrayList<{{className}}Wrapper>(aList.size());
-		for(int i = 0 ; i < aList.size(); i++) allWrapped.add(new {{className}}Wrapper(aList.get(i))); 
-		return new Object(){ @JsonProperty List<{{className}}Wrapper> {{plural}} = allWrapped; };
+	public static Object wrapAll(List<{{modelType}}> aList) {
+		final ArrayList<{{modelInnerWrapperType}}> allWrapped = new ArrayList();
+		for(int i = 0 ; i < aList.size(); i++) allWrapped.add(new {{modelInnerWrapperType}}(aList.get(i))); 
+		return new Object(){ @JsonProperty List<{{modelInnerWrapperType}}> {{plural}} = allWrapped; };
 	};
 	
-	public static Object wrapAll(Map<?, {{className}}> aMap) {
-		final HashMap<Object, {{className}}Wrapper> allWrapped = new HashMap<Object, {{className}}Wrapper>(aMap.size());
-		for(Object key : aMap.keySet()) allWrapped.put(key, new {{className}}Wrapper(aMap.get(key))); 
-		return new Object(){ @JsonProperty Map<Object, {{className}}Wrapper> {{plural}} = allWrapped; };
+	public static Object wrapAll(Map<?, {{modelType}}> aMap) {
+		final HashMap<Object, {{modelInnerWrapperType}}> allWrapped = new HashMap();
+		for(Object key : aMap.keySet()) allWrapped.put(key, new {{modelInnerWrapperType}}(aMap.get(key))); 
+		return new Object(){ @JsonProperty Map<Object, {{modelInnerWrapperType}}> {{plural}} = allWrapped; };
 	};
 	
-	public static {{className}}Wrap wrap(final {{className}} aResult) {
-		return new {{className}}Wrap(aResult);
+	public static {{modelOuterWrapperType}} wrap(final {{modelType}} aResult) {
+		return new {{modelOuterWrapperType}}(aResult);
 	}
 	
-	static class {{className}}Wrap {
-		@JsonProperty {{className}}Wrapper {{singular}};
+	static class {{modelOuterWrapperType}} {
+		@JsonProperty {{modelInnerWrapperType}} {{singular}};
 		
-		public {{className}}Wrap() { this(new {{className}}()); };
-		public {{className}}Wrap({{className}} aWrappable) { {{singular}} = new {{className}}Wrapper(aWrappable); };
+		public {{modelOuterWrapperType}}() { this(new {{modelType}}()); };
+		public {{modelOuterWrapperType}}({{modelType}} aWrappable) { {{singular}} = new {{modelInnerWrapperType}}(aWrappable); };
+		public {{modelType}} unwrap() { return {{singular}}.unwrap(); }
 	}
 	
-{{#wrapperPopulator}}
-	{{#entityCollectionProperties}}
+{{#modelWrapper}}
+	{{#modelCollectionProperties}}
 	// Link routes
 	{{#properties}}
 	@GET
-	@Path("{{idPathExtension}}/{{plural}}")
-	public Object {{getterName}}({{{idParameters}}}) throws Exception {
-		return {{targetType}}{{controllerClassPostfix}}.wrapAll(findModel({{singularIdName}}).{{getterName}}());
+	@Path("{{{idPath}}}/{{name}}")
+	public Object {{getterName}}({{{idMethodParameters}}}) throws Exception {
+		return {{controllerType}}.wrapAll(findModel({{idMethodAttributes}}).{{getterName}}());
 	}
-
+	
 	{{/properties}}
-	{{/entityCollectionProperties}}
-	static class {{className}}Wrapper {
-		{{className}} wrapped;
+	{{/modelCollectionProperties}}
+	public static class {{modelInnerWrapperType}} {
+		{{modelType}} {{singular}};
 		
-		{{#entityCollectionProperties}}
-		// Routes for entity collection properties
-		@JsonProperty Object links = new Object() { 
-		{{#properties}}
-			@JsonProperty String {{plural}} = "{{plural}}";
-		{{/properties}}
-		};
-		
-		{{/entityCollectionProperties}}
-		public {{className}}Wrapper() { this(new {{className}}()); }
-		public {{className}}Wrapper({{className}} aWrapped) { wrapped = aWrapped; }
+		public {{modelInnerWrapperType}}() { this(new {{modelType}}()); }
+		public {{modelInnerWrapperType}}({{modelType}} aWrappable) { {{singular}} = aWrappable; }
+
+		public {{modelType}} unwrap() { return {{singular}}; }
 
 		{{#simpleProperties}}
 		// Simple properties
 		{{#properties}}
-		public {{type}} {{getterName}}() { return wrapped.{{getterName}}(); }
-		public void {{setterName}}({{type}} {{parameterName}}) { wrapped.{{setterName}}({{parameterName}}); }
+		public {{type}} {{getterName}}() { return {{singular}}.{{getterName}}(); }
+		public void {{setterName}}({{type}} {{name}}) { {{singular}}.{{setterName}}({{name}}); }
 		{{/properties}}
 		{{/simpleProperties}}
-		{{#entityPropertiesWithSimpleIds}}
-		// Entity properties with simple id's
+		{{#modelPropertiesWithSimpleIds}}
+		// Model properties with simple id's
 		{{#properties}}
-		public {{idType}} {{getterName}}() { return wrapped.{{getterName}}().{{idGetterName}}(); }
-		public void {{setterName}}({{idType}} id) {
-			{{entityType}} entity = new {{entityType}}();
-			entity.{{idSetterName}}(id);
-			wrapped.{{setterName}}(entity);
+		public {{idType}} {{getterName}}() { return {{singular}}.{{getterName}}().{{idGetterName}}(); }
+		public void {{setterName}}({{idType}} {{idName}}) {
+			{{type}} {{name}} = new {{type}}();
+			{{name}}.{{idSetterName}}({{idName}});
+			{{singular}}.{{setterName}}({{name}});
 		}
 		{{/properties}}
-		{{/entityPropertiesWithSimpleIds}}
-		{{#entityPropertiesWithEmbeddedIds}}
-		// Entity properties with embedded id's
+		{{/modelPropertiesWithSimpleIds}}
+		{{#modelPropertiesWithEmbeddedIds}}
+		// Model properties with embedded id's
 		{{#properties}}
-		public String {{getterName}}() { 
-			{{idType}} id = wrapped.{{getterName}}().{{idGetterName}}();
-			return (new StringBuilder()){{#idProperties}}.append("{{urlIdDelimiter}}").append(id.{{property}}){{/idProperties}}{{#idAccessors}}.append("{{urlIdDelimiter}}").append(id.{{getterName}}()){{/idAccessors}}.toString();
+		public String {{getterName}}() {
+			{{idType}} {{idName}} = {{singular}}.{{getterName}}().{{idGetterName}}();
+			return {{{idSerialiseLine}}};
 		}
-		public void {{setterName}}(String composedId) throws ParseException {
-			String parts[] = composedId.split("{{urlIdDelimiter}}");
-			{{idType}} id = new {{idType}}();
+		public void {{setterName}}(String {{serialisedId}}) throws Exception {
+			String[] parts = {{serialisedId}}.split("{{urlDelimiter}}");
+			{{idType}} {{idName}} = new {{idType}}();
 			{{#idProperties}}
-			id.{{property}} = parse(parts[{{index}}], {{type}}.class);
+			{{idName}}.{{propertyName}} = parse(parts[{{index}}], {{propertyType}}.class);
 			{{/idProperties}}
-			{{#idAccessors}}
-			id.{{setterName}}(parse(parts[{{index}}], {{type}}.class));
-			{{/idAccessors}}
-			{{entityType}} entity = new {{entityType}}();
-			entity.{{idSetterName}}(id);
-			wrapped.{{setterName}}(entity);
+			{{type}} {{name}} = new {{type}}();
+			{{name}}.{{idSetterName}}({{idName}});
+			{{singular}}.{{setterName}}({{name}});
 		}
 		{{/properties}}
-		{{/entityPropertiesWithEmbeddedIds}}
-		{{#entityPropertiesWithCompositeIds}}
-		// Entity properties with composite id's
+		{{/modelPropertiesWithEmbeddedIds}}
+		{{#modelPropertiesWithCompositeIds}}
+		// Model properties with composite id's
 		{{#properties}}
 		public String {{getterName}}() { 
-			{{entityType}} entity = wrapped.{{getterName}}();
-			return (new StringBuilder()){{#idAccessors}}.append("{{urlIdDelimiter}}").append(entity.{{getterName}}()){{/idAccessors}}.toString(); 
+			{{type}} {{name}} = {{singular}}.{{getterName}}();
+			return {{{idSerialiseLine}}}; 
 		}
-		public void {{setterName}}(String composedId) throws ParseException {
-			String[] parts = composedId.split("{{urlIdDelimiter}}");
-			{{entityType}} entity = new {{entityType}}();
-			{{#idAccessors}}
-			entity.{{setterName}}(parse(parts[{{index}}], {{type}}.class));
-			{{/idAccessors}}
-			wrapped.{{setterName}}(entity);
+		public void {{setterName}}(String {{serialisedId}}) throws Exception {
+			String[] parts = {{serialisedId}}.split("{{urlDelimiter}}");
+			{{type}} {{name}} = new {{type}}();
+			{{#idProperties}}
+			{{name}}.{{propertySetterName}}(parse(parts[{{index}}], {{propertyType}}.class));
+			{{/idProperties}}
+			{{singular}}.{{setterName}}({{name}});
 		}
 		{{/properties}}
-		{{/entityPropertiesWithCompositeIds}}
-		{{#entityCollectionProperties}}
-		// Entity collection properties
+		{{/modelPropertiesWithCompositeIds}}
+		{{#modelCollectionProperties}}
+		// Model collection properties
 		{{#properties}}
-		public void {{setterName}}({{type}} {{parameterName}}) { wrapped.{{setterName}}({{parameterName}}); }
+		public void {{setterName}}({{type}}<{{modelInnerWrapperType}}> {{wrappedName}}) { 
+			{{type}}<{{modelType}}> {{name}} = new {{instanceType}}();
+			for({{modelInnerWrapperType}} {{loopVariable}} : {{wrappedName}}) 
+				{{name}}.add({{loopVariable}}.unwrap());
+			{{singular}}.{{setterName}}({{name}}); 
+		}
 		{{/properties}}
-		{{/entityCollectionProperties}}
+		
+		// Links for model collection properties - required by the ember data format
+		@JsonProperty Object links = new Object() { 
+		{{#properties}}
+			@JsonProperty String {{modelPlural}} = "{{modelPlural}}";
+		{{/properties}}
+		};
+		{{/modelCollectionProperties}}
 	}
-{{/wrapperPopulator}}
-
+{{/modelWrapper}}
 }

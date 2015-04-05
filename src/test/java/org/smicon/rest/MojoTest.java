@@ -43,6 +43,7 @@ public class MojoTest
 		}
 		catch(Exception e)
 		{
+			e.printStackTrace();
 			assertTrue(false);
 		}
 	}
