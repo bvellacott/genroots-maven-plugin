@@ -26,7 +26,7 @@ public class MustacheSchemaBuilder
 		variable("\\{\\{\\s*" + javaIdentifierRegExp + "\\s*\\}\\}"),
 		escapedVariable("\\{\\{\\{\\s*" + javaIdentifierRegExp + "\\s*\\}\\}\\}"),
 		sectionStart("\\{\\{#\\s*" + javaIdentifierRegExp + "\\s*\\}\\}"),
-		invertedSectionStart("\\{\\{^\\s*" + javaIdentifierRegExp + "\\s*\\}\\}"),
+		invertedSectionStart("\\{\\{\\^\\s*" + javaIdentifierRegExp + "\\s*\\}\\}"),
 		sectionEnd("\\{\\{/\\s*" + javaIdentifierRegExp + "\\s*\\}\\}"),
 		//partial("\\{\\{>\\s*" + javaIdentifierRegExp + "\\s*\\}\\}"),
 		// no support for set delimiters or partials
@@ -152,13 +152,16 @@ public class MustacheSchemaBuilder
 					new Node(currentSection, tag);
 				break;
 			case sectionStart:
-				if(!currentSection.children.containsKey(tag) || !(currentSection.children.get(tag) instanceof Section)) 
+				Tag invertedSectionStartTag = new Tag(TagType.invertedSectionStart, tag.identifier);
+				if(!(currentSection.children.containsKey(tag) || currentSection.children.containsKey(invertedSectionStartTag))) 
 					new Section(currentSection, tag);
 				currentSection = (Section)currentSection.children.get(tag);
 				break;
 			case invertedSectionStart:
-				if(!currentSection.children.containsKey(tag)) 
-					currentSection = new Section(currentSection, tag);
+				Tag sectionStartTag = new Tag(TagType.sectionStart, tag.identifier);
+				if(!(currentSection.children.containsKey(tag) || currentSection.children.containsKey(sectionStartTag)))
+					new Section(currentSection, tag);
+				currentSection = (Section)currentSection.children.get(sectionStartTag);
 				break;
 			case sectionEnd:
 				if(!tag.identifier.equals(currentSection.tag.identifier))
@@ -180,8 +183,8 @@ public class MustacheSchemaBuilder
 		try {
 //			contents = readFile(args[0], Charset.defaultCharset());
 			
-//			contents = readFile("/home/benjamin/Desktop/projects/java/genroots-maven-plugin/src/main/resources/org/smicon/rest/ControllerTemplate.mustache", Charset.defaultCharset());
-			contents = readFile("/home/benjamin/Desktop/projects/java/genroots-maven-plugin/src/main/resources/org/smicon/rest/EmberModel.mustache", Charset.defaultCharset());
+			contents = readFile("/home/benjamin/Desktop/projects/java/genroots-maven-plugin/src/main/resources/org/smicon/rest/ControllerTemplate.mustache", Charset.defaultCharset());
+//			contents = readFile("/home/benjamin/Desktop/projects/java/genroots-maven-plugin/src/main/resources/org/smicon/rest/EmberModel.mustache", Charset.defaultCharset());
 		}catch(Exception e)
 		{
 			System.out.println("Unable to open file!");

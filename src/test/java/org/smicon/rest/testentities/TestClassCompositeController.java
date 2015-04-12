@@ -19,17 +19,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import papu.mvc.Controller;
 
+import java.util.Date;
 import org.smicon.rest.testentities.CompositeKey;
 import java.lang.Class;
+import java.lang.Class;
 import org.smicon.rest.testentities.TestClassComposite;
-import org.smicon.rest.testentities.EmbeddableCompositeKey;
+import org.smicon.rest.testentities.CompositeKey;
 import org.smicon.rest.testentities.EmbeddableCompositeKey;
 import org.smicon.rest.testentities.TestClass;
 import java.lang.String;
 import org.smicon.rest.testentities.TestClassEmbedded;
-import java.lang.Class;
-import java.util.Date;
-import org.smicon.rest.testentities.CompositeKey;
+import org.smicon.rest.testentities.EmbeddableCompositeKey;
 
 @Singleton
 @Path("testcclasses")
@@ -67,30 +67,33 @@ Controller<TestClassComposite, CompositeKey>
 	}
 
 	@GET
-	@Path("/{key1}::{key2}")
-	public TestClassCompositeOW find(@PathParam("key1") int key1, @PathParam("key2") int key2) throws Exception {
+	@Path("/{key1}::{key2}::{key3}")
+	public TestClassCompositeOW find(@PathParam("key1") int key1, @PathParam("key2") int key2, @PathParam("key3") int key3) throws Exception {
 		CompositeKey id = new CompositeKey();
 		id.key1 = key1;
 		id.key2 = key2;
+		id.key3 = key3;
 		return wrap(findModel(id));
 	}
 
 	@PUT
-	@Path("/{key1}::{key2}")
-	public TestClassCompositeOW update(@PathParam("key1") int key1, @PathParam("key2") int key2, TestClassCompositeOW aModelOW) throws Exception {
+	@Path("/{key1}::{key2}::{key3}")
+	public TestClassCompositeOW update(@PathParam("key1") int key1, @PathParam("key2") int key2, @PathParam("key3") int key3, TestClassCompositeOW aModelOW) throws Exception {
 		TestClassComposite aModel = aModelOW.unwrap();
 		aModel.setKey1(key1);
 		aModel.setKey2(key2);
+		aModel.setKey3(key3);
 
 		return wrap(updateModel(aModel));
 	}
 
 	@DELETE
-	@Path("/{key1}::{key2}")
-	public TestClassCompositeOW delete(@PathParam("key1") int key1, @PathParam("key2") int key2) throws Exception {
+	@Path("/{key1}::{key2}::{key3}")
+	public TestClassCompositeOW delete(@PathParam("key1") int key1, @PathParam("key2") int key2, @PathParam("key3") int key3) throws Exception {
 		CompositeKey id = new CompositeKey();
 		id.key1 = key1;
 		id.key2 = key2;
+		id.key3 = key3;
 		return wrap(deleteModel(id));
 	}
 
@@ -132,6 +135,8 @@ Controller<TestClassComposite, CompositeKey>
 		public void setKey1(int key1) { testclasscomposite.setKey1(key1); }
 		public int getKey2() { return testclasscomposite.getKey2(); }
 		public void setKey2(int key2) { testclasscomposite.setKey2(key2); }
+		public int getKey3() { return testclasscomposite.getKey3(); }
+		public void setKey3(int key3) { testclasscomposite.setKey3(key3); }
 		// Model properties with simple id's
 		public int getSimple() { return testclasscomposite.getSimple().getId1(); }
 		public void setSimple(int id1) {
@@ -157,13 +162,14 @@ Controller<TestClassComposite, CompositeKey>
 		// Model properties with composite id's
 		public String getComposite() { 
 			TestClassComposite composite = testclasscomposite.getComposite();
-			return (new StringBuilder()).append(composite.getKey1()).append("::").append(composite.getKey2()).toString(); 
+			return (new StringBuilder()).append(composite.getKey1()).append("::").append(composite.getKey2()).append("::").append(composite.getKey3()).toString(); 
 		}
 		public void setComposite(String id) throws Exception {
 			String[] parts = id.split("::");
 			TestClassComposite composite = new TestClassComposite();
 			composite.setKey1(parse(parts[0], int.class));
 			composite.setKey2(parse(parts[1], int.class));
+			composite.setKey3(parse(parts[2], int.class));
 			testclasscomposite.setComposite(composite);
 		}
 		// Model collection properties

@@ -21,19 +21,19 @@ public final class EmberModelTemplateDatas
 		return data;
 	}
 	
-	public static Object createSimpleProperties(ModelMetaI aMeta, EmberModelTypeConfigurationI aConfiguration) {
-		List props = new ArrayList();
-		for(String propName : aMeta.getSimpleProperties().keySet()) {
+	public static Object createSimpleProperties(ModelMetaI aMeta, final EmberModelTypeConfigurationI aConfiguration) {
+		final List props = new ArrayList();
+		for(final String propName : aMeta.getSimpleProperties().keySet()) {
 			if(aMeta.getIdPathParameterMetas().containsKey(propName)) continue;
 			if(aMeta.getEmbeddedIdPathParameterMetas().containsKey(propName)) continue;
-			Class propType = aMeta.getSimpleProperties().get(propName).getPropertyDescriptor().getPropertyType();
+			final Class propType = aMeta.getSimpleProperties().get(propName).getPropertyDescriptor().getPropertyType();
 			props.add(new Object() {
 	            public Object parameterName = propName;
 	            public Object jsType = getEmberJsType(propType, aConfiguration);
 		    });
 		}
-		for(String propName : aMeta.getSimpleCollectionProperties().keySet()) {
-			Class propType = aMeta.getSimpleCollectionProperties().get(propName).getPropertyDescriptor().getPropertyType();
+		for(final String propName : aMeta.getSimpleCollectionProperties().keySet()) {
+			final Class propType = aMeta.getSimpleCollectionProperties().get(propName).getPropertyDescriptor().getPropertyType();
 			props.add(new Object() {
 	            public Object parameterName = propName;
 	            public Object jsType = getEmberJsType(propType, aConfiguration);
@@ -43,9 +43,9 @@ public final class EmberModelTemplateDatas
 	}
 	
 	public static final Object createPropertiesWithSimpleIds(ModelMetaI aMeta) {
-		List props = new ArrayList();
-		for(String propName : aMeta.getModelPropertiesWithSimpleIds().keySet()) {
-			Class propType = aMeta.getModelPropertiesWithSimpleIds().get(propName).getPropertyDescriptor().getPropertyType();
+		final List props = new ArrayList();
+		for(final String propName : aMeta.getModelPropertiesWithSimpleIds().keySet()) {
+			final Class propType = aMeta.getModelPropertiesWithSimpleIds().get(propName).getPropertyDescriptor().getPropertyType();
 			props.add(new Object() {
 	            public Object parameterName = propName;
 	            public Object targetTypeStringForm = getJsTypeStringForm(propType.getSimpleName());
@@ -56,9 +56,9 @@ public final class EmberModelTemplateDatas
 	}
 
 	public static final Object createPropertiesWithEmbeddedIds(ModelMetaI aMeta) {
-		List props = new ArrayList();
-		for(String propName : aMeta.getModelPropertiesWithEmbeddedIds().keySet()) {
-			Class propType = aMeta.getModelPropertiesWithEmbeddedIds().get(propName).getPropertyDescriptor().getPropertyType();
+		final List props = new ArrayList();
+		for(final String propName : aMeta.getModelPropertiesWithEmbeddedIds().keySet()) {
+			final Class propType = aMeta.getModelPropertiesWithEmbeddedIds().get(propName).getPropertyDescriptor().getPropertyType();
 			props.add(new Object() {
 	            public Object parameterName = propName;
 	            public Object targetTypeStringForm = getJsTypeStringForm(propType.getSimpleName());
@@ -69,9 +69,9 @@ public final class EmberModelTemplateDatas
 	}
 
 	public static final Object createPropertiesWithCompositeIds(ModelMetaI aMeta) {
-		List props = new ArrayList();
-		for(String propName : aMeta.getModelPropertiesWithCompositeIds().keySet()) {
-			Class propType = aMeta.getModelPropertiesWithCompositeIds().get(propName).getPropertyDescriptor().getPropertyType();
+		final List props = new ArrayList();
+		for(final String propName : aMeta.getModelPropertiesWithCompositeIds().keySet()) {
+			final Class propType = aMeta.getModelPropertiesWithCompositeIds().get(propName).getPropertyDescriptor().getPropertyType();
 			props.add(new Object() {
 	            public Object parameterName = propName;
 	            public Object targetTypeStringForm = getJsTypeStringForm(propType.getSimpleName());
@@ -82,9 +82,9 @@ public final class EmberModelTemplateDatas
 	}
 
 	public static final Object createModelCollectionProperties(ModelMetaI aMeta) {
-		List props = new ArrayList();
-		for(String propName : aMeta.getModelCollectionProperties().keySet()) {
-			Class targerType = aMeta.getModelCollectionProperties().get(propName).getTargetMeta().getModelClass();
+		final List props = new ArrayList();
+		for(final String propName : aMeta.getModelCollectionProperties().keySet()) {
+			final Class targerType = aMeta.getModelCollectionProperties().get(propName).getTargetMeta().getModelClass();
 			props.add(new Object() {
 	            public Object parameterName = propName;
 	            public Object targetTypeStringForm = getJsTypeStringForm(targerType.getSimpleName());

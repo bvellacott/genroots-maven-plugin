@@ -61,17 +61,17 @@ public class testLibs {
 //			}
 //		});
 		
-		Function<String, String> f1 = new Function<String, String>() {
-
-			@Override
-			public String apply(String t)
-			{
-				return "f1 -> " + t;
-			}};
-			
-		Function f2 = (lambda) -> "f2 -> " + ((Function<String, String>) lambda).apply("Hello!");
+//		Function<String, String> f1 = new Function<String, String>() {
+//
+//			@Override
+//			public String apply(String t)
+//			{
+//				return "f1 -> " + t;
+//			}};
+//			
+//		Function f2 = (lambda) -> "f2 -> " + ((Function<String, String>) lambda).apply("Hello!");
 		
-		System.out.println(f2.apply(f1));
+//		System.out.println(f2.apply(f1));
 	}
 	
 	class Bean<Mean, Lean, Sean> {

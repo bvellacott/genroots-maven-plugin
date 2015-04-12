@@ -20,11 +20,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import papu.mvc.Controller;
 
 import org.smicon.rest.testentities.TestClassComposite;
+import static org.smicon.rest.testentities.TestClassEmbeddedController.*;
 import org.smicon.rest.testentities.TestClassEmbedded;
 import java.util.ArrayList;
-import org.smicon.rest.testentities.CompositeKey;
 import java.util.List;
-import static org.smicon.rest.testentities.TestClassEmbeddedController.*;
+import org.smicon.rest.testentities.CompositeKey;
 
 @Singleton
 @Path("testclasses")
@@ -128,13 +128,14 @@ Controller<TestClass, Integer>
 		// Model properties with composite id's
 		public String getCompost() { 
 			TestClassComposite compost = testclass.getCompost();
-			return (new StringBuilder()).append(compost.getKey1()).append("::").append(compost.getKey2()).toString(); 
+			return (new StringBuilder()).append(compost.getKey1()).append("::").append(compost.getKey2()).append("::").append(compost.getKey3()).toString(); 
 		}
 		public void setCompost(String id) throws Exception {
 			String[] parts = id.split("::");
 			TestClassComposite compost = new TestClassComposite();
 			compost.setKey1(parse(parts[0], int.class));
 			compost.setKey2(parse(parts[1], int.class));
+			compost.setKey3(parse(parts[2], int.class));
 			testclass.setCompost(compost);
 		}
 		// Model collection properties

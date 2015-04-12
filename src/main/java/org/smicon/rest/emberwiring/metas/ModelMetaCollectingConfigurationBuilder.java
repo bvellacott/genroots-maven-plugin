@@ -1,5 +1,9 @@
 package org.smicon.rest.emberwiring.metas;
 
+import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,11 +34,22 @@ BuilderI<ModelMetaCollectingConfigurationI>
 	{
 		ModelMetaCollectingConfigurationInstance instance = new ModelMetaCollectingConfigurationInstance();
 		instance.packageName = packageName;
-		instance.reflections = Pools.reflectionsPool.borrowObject(packageName);
+		
 		if(classpathElements != null)
 			instance.classpathElements = classpathElements;
 		else
 			instance.classpathElements = Arrays.asList("target/project/WEB-INF/classes/" + packageName);
+		
+		List<URL> urls = new ArrayList();
+		for (String element : instance.classpathElements)
+			urls.add(new File(element).toURI().toURL());
+
+		ClassLoader contextClassLoader = URLClassLoader.newInstance(urls.toArray(new URL[urls.size()]), Thread.currentThread().getContextClassLoader());
+
+		Thread.currentThread().setContextClassLoader(contextClassLoader);
+
+
+		instance.reflections = Pools.reflectionsPool.borrowObject(packageName);
 		instance.validationData = validationData;
 		return instance;
 	}

@@ -50,7 +50,7 @@ Controller<{{modelType}}, {{wrappedIdType}}>
 
 	@POST
 	@Path("{{{nonGeneratedIdPath}}}")
-	public {{modelOuterWrapperType}} create({{{nonGeneratedIdMethodParameters}}}, {{modelOuterWrapperType}} {{outerWrapperVariableName}}) throws Exception {
+	public {{modelOuterWrapperType}} create({{{nonGeneratedIdMethodParameters}}}{{#hasNonGenIds}}, {{/hasNonGenIds}}{{modelOuterWrapperType}} {{outerWrapperVariableName}}) throws Exception {
 		{{modelType}} {{modelVariableName}} = {{outerWrapperVariableName}}.unwrap();
 		{{#simple}}
 		{{#nonGeneratedIdProperty}}
@@ -277,18 +277,28 @@ Controller<{{modelType}}, {{wrappedIdType}}>
 		{{#modelCollectionProperties}}
 		// Model collection properties
 		{{#properties}}
+		{{#isMap}}
+		public void {{setterName}}({{type}}<{{keyType}}, {{modelInnerWrapperType}}> {{wrappedName}}) { 
+			{{type}}<{{keyType}}, {{modelType}}> {{name}} = new {{instanceType}}();
+			for({{keyType}} _key_ : {{wrappedName}}.keySet()) 
+				{{name}}.put(_key_, {{wrappedName}}.get(_key_).unwrap());
+			{{singular}}.{{setterName}}({{name}}); 
+		}
+		{{/isMap}}
+		{{^isMap}}
 		public void {{setterName}}({{type}}<{{modelInnerWrapperType}}> {{wrappedName}}) { 
 			{{type}}<{{modelType}}> {{name}} = new {{instanceType}}();
 			for({{modelInnerWrapperType}} {{loopVariable}} : {{wrappedName}}) 
 				{{name}}.add({{loopVariable}}.unwrap());
 			{{singular}}.{{setterName}}({{name}}); 
 		}
+		{{/isMap}}
 		{{/properties}}
 		
 		// Links for model collection properties - required by the ember data format
 		@JsonProperty Object links = new Object() { 
 		{{#properties}}
-			@JsonProperty String {{modelPlural}} = "{{modelPlural}}";
+			@JsonProperty String {{name}} = "{{modelPlural}}";
 		{{/properties}}
 		};
 		{{/modelCollectionProperties}}

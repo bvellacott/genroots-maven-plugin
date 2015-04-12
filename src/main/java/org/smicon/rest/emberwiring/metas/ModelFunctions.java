@@ -49,11 +49,16 @@ import com.google.common.collect.ImmutableMap.Builder;
 public final class ModelFunctions
 {
 	
-	public static Class<? extends IdType> deduceIdType(Class<?> aModelClass)
+	public static Class<? extends IdType> deduceIdType(Class<?> aModelClass) throws Exception
 	{
 		if (aModelClass.getAnnotation(IdClass.class) != null) return IdTypeEnum.composite;
 
 		boolean containsSimpleId = false;
+		for(PropertyDescriptor pd : getBeanInfo(aModelClass, USE_ALL_BEANINFO).getPropertyDescriptors())
+		{
+			if (pd.getReadMethod().getAnnotation(EmbeddedId.class) != null) return IdTypeEnum.embedded;
+			else if (pd.getReadMethod().getAnnotation(Id.class) != null) containsSimpleId = true;
+		}
 		for (Field field : aModelClass.getDeclaredFields())
 		{
 			if (field.getAnnotation(EmbeddedId.class) != null) return IdTypeEnum.embedded;
@@ -189,8 +194,8 @@ public final class ModelFunctions
 				if(simpleCollectionProperties.containsKey(desc.getName()))
 					simpleCollectionPropertiesBuilder.put(desc.getName(), getSimplePropertyMeta(desc, false));
 				else if(modelCollectionProperties.containsKey(desc.getName())) {
-					OneToMany om = desc.getPropertyType().getAnnotation(OneToMany.class);
-					ManyToMany mm = desc.getPropertyType().getAnnotation(ManyToMany.class);
+					OneToMany om = desc.getReadMethod().getAnnotation(OneToMany.class);
+					ManyToMany mm = desc.getReadMethod().getAnnotation(ManyToMany.class);
 					Class targetModel = null;
 					if(om != null) targetModel = om.targetEntity();
 					if(targetModel == null && mm != null) targetModel = mm.targetEntity();
@@ -280,14 +285,6 @@ public final class ModelFunctions
 		Builder modelsByFullName = ImmutableMap.builder();
 		Builder modelMetas = ImmutableMap.builder();
 		
-		List<URL> urls = new ArrayList();
-		for (String element : aConfiguration.getCompiledClasspathElements())
-			urls.add(new File(element).toURI().toURL());
-
-		ClassLoader contextClassLoader = URLClassLoader.newInstance(urls.toArray(new URL[0]), Thread.currentThread().getContextClassLoader());
-
-		Thread.currentThread().setContextClassLoader(contextClassLoader);
-
 		Set<Class<?>> models = aConfiguration.getReflections().getTypesAnnotatedWith(Model.class);
 
 		for(Class<?> model : models)

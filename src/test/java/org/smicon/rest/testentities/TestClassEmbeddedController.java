@@ -19,11 +19,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import papu.mvc.Controller;
 
-import org.smicon.rest.testentities.EmbeddableCompositeKey;
-import java.lang.String;
 import org.smicon.rest.testentities.TestClass;
+import org.smicon.rest.testentities.EmbeddableCompositeKey;
 import java.util.Date;
 import java.lang.Class;
+import java.lang.String;
 
 @Singleton
 @Path("embeddeds")
@@ -51,13 +51,12 @@ Controller<TestClassEmbedded, EmbeddableCompositeKey>
 	}
 
 	@POST
-	@Path("/{emKey1}::{emKey2}::{emKey3}")
-	public TestClassEmbeddedOW create(@PathParam("emKey1") int emKey1, @PathParam("emKey2") String emKey2, @PathParam("emKey3") Date emKey3, TestClassEmbeddedOW aModelOW) throws Exception {
+	@Path("/{emKey1}::{emKey2}")
+	public TestClassEmbeddedOW create(@PathParam("emKey1") int emKey1, @PathParam("emKey2") String emKey2, TestClassEmbeddedOW aModelOW) throws Exception {
 		TestClassEmbedded aModel = aModelOW.unwrap();
 		EmbeddableCompositeKey embId = new EmbeddableCompositeKey();
 		embId.emKey1 = emKey1;
 		embId.emKey2 = emKey2;
-		embId.emKey3 = emKey3;
 		aModel.setEmbId(embId);
 		
 		return wrap(createModel(aModel));

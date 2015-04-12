@@ -17,6 +17,7 @@ package org.smicon.rest;
  */
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.maven.execution.MavenSession;
@@ -67,7 +68,10 @@ AbstractMojo
 	@Parameter(defaultValue = "${session}", required = true)
 	private MavenSession session;
 	
-	@Parameter(property = "project.compileClasspathElements", required = true, readonly = true)
+	@Parameter(defaultValue = "${project.compileClasspathElements}", required = true, readonly = true)
+	private List<String> mavenProjectClasspathElements;
+	
+	@Parameter
 	private List<String> classpathElements;
 
 	private String packageName;
@@ -94,6 +98,16 @@ AbstractMojo
 		WiringConfigurationBuilder configBuilder = Builders.WiringConfiguration(resourceRoot, packageName).
 			withLogger(logger);
 		
+		if(classpathElements == null && 
+			mavenProjectClasspathElements != null && 
+			mavenProjectClasspathElements.size() > 0)
+		{
+			classpathElements = new ArrayList();
+			for(String cpe : mavenProjectClasspathElements) {
+				classpathElements.add(cpe + '/');
+				classpathElements.add(cpe + '/' + packageName);
+			}
+		}
 		if(classpathElements != null)
 			configBuilder.withClassPathElements(classpathElements);
 		

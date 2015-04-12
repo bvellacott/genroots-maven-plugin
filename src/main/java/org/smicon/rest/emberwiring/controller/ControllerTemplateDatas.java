@@ -5,6 +5,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
@@ -138,6 +139,48 @@ public final class ControllerTemplateDatas
 		return result;
 	}
 	
+	public static Object createHasNonGenIds(ModelMetaI aMeta) throws Exception{
+		boolean has = false;
+		
+		if(aMeta.getIdType() == IdTypeEnum.embedded) {
+			boolean isFirst = true;
+			BeanInfo idbi = Introspector.getBeanInfo(aMeta.getIdClass());
+			Set<String> nameSet = new HashSet();
+			for(PropertyDescriptor pd : idbi.getPropertyDescriptors()) {
+				if(pd.getName().equals("class")) continue;
+				nameSet.add(pd.getName());
+				Field f = aMeta.getIdClass().getDeclaredField(pd.getName());
+				boolean isGenerated = pd.getReadMethod().getAnnotation(GeneratedValue.class) != null ||
+					(f != null &&f.getAnnotation(GeneratedValue.class) != null);
+				if(!isGenerated) {
+					has = true;
+					break;
+				}
+			}
+			for(Field f : aMeta.getIdClass().getDeclaredFields()) {
+				if(nameSet.contains(f.getName())) continue;
+				boolean isGenerated = f.getAnnotation(GeneratedValue.class) != null;
+				if(!isGenerated) {
+					has = true;
+					break;
+				}
+			}
+		}
+		else {
+			boolean isFirst = true;
+			for(String idName : aMeta.getIdPathParameterMetas().keySet()) {
+				SimplePropertyMetaI meta = aMeta.getIdPathParameterMetas().get(idName);
+				String idType = meta.getPropertyDescriptor().getPropertyType().getSimpleName();
+				if(!meta.isGenerated()) {
+					has = true;
+					break;
+				}
+			}
+		}
+		if(has) return new Object();
+		return null;
+	}
+	
 	public static Object createIdMethodAttributes(final ModelMetaI aMeta, boolean aIncludeGenerated) throws Exception {
 		StringBuilder sb = GeneralPools.string_builder_pool.borrowObject();
 		
@@ -167,7 +210,7 @@ public final class ControllerTemplateDatas
 	}
 	
 	public static Object createSimpleProperty(SimplePropertyMetaI aMeta) {
-		PropertyDescriptor pd = aMeta.getPropertyDescriptor();
+		final PropertyDescriptor pd = aMeta.getPropertyDescriptor();
 		return new Object() {
             public Object type = pd.getPropertyType().getSimpleName();
             public Object getterName = pd.getReadMethod().getName();
@@ -184,9 +227,9 @@ public final class ControllerTemplateDatas
 	}
 	
 	public static Object createModelPropertyWithSimpleId(ModelPropertyMetaI aMeta) {
-		PropertyDescriptor pd = aMeta.getPropertyDescriptor();
-		ModelMetaI mm = aMeta.getTargetMeta();
-		PropertyDescriptor idpd = mm.getIdPathParameterMetas().get(mm.getSingularIdName()).getPropertyDescriptor();
+		final PropertyDescriptor pd = aMeta.getPropertyDescriptor();
+		final ModelMetaI mm = aMeta.getTargetMeta();
+		final PropertyDescriptor idpd = mm.getIdPathParameterMetas().get(mm.getSingularIdName()).getPropertyDescriptor();
 		return new Object() {
             public Object name = pd.getName();
             public Object type = pd.getPropertyType().getSimpleName();
@@ -206,10 +249,10 @@ public final class ControllerTemplateDatas
 		return props;
 	}
 	
-	public static Object createModelPropertyWithEmbeddedId(ModelPropertyMetaI aMeta, String aUrlDelimiter) throws Exception {
-		PropertyDescriptor pd = aMeta.getPropertyDescriptor();
-		ModelMetaI mm = aMeta.getTargetMeta();
-		PropertyDescriptor idpd = mm.getEmbeddedIdPathParameterMetas().get(mm.getSingularIdName()).getPropertyDescriptor();
+	public static Object createModelPropertyWithEmbeddedId(ModelPropertyMetaI aMeta, final String aUrlDelimiter) throws Exception {
+		final PropertyDescriptor pd = aMeta.getPropertyDescriptor();
+		final ModelMetaI mm = aMeta.getTargetMeta();
+		final PropertyDescriptor idpd = mm.getEmbeddedIdPathParameterMetas().get(mm.getSingularIdName()).getPropertyDescriptor();
 		return new Object() {
             public String name = pd.getName();
             public Object type = pd.getPropertyType().getSimpleName();
@@ -231,7 +274,7 @@ public final class ControllerTemplateDatas
 		Set<String> nameSet = new HashSet();
 		BeanInfo bi = Introspector.getBeanInfo(aIdType, Introspector.USE_ALL_BEANINFO);
 		int index = 0;
-		for(PropertyDescriptor pd : bi.getPropertyDescriptors()) {
+		for(final PropertyDescriptor pd : bi.getPropertyDescriptors()) {
 			if(pd.getName().equals("class")) continue;
 			nameSet.add(pd.getName());
 			final int finalIndex = index;
@@ -242,7 +285,7 @@ public final class ControllerTemplateDatas
 			});
 			index++;
 		}
-		for(Field f : aIdType.getDeclaredFields()) {
+		for(final Field f : aIdType.getDeclaredFields()) {
 			if(nameSet.contains(f.getName())) continue;
 			nameSet.add(f.getName());
 			final int finalIndex = index;
@@ -294,9 +337,9 @@ public final class ControllerTemplateDatas
 		return props;
 	}
 	
-	public static Object createModelPropertyWithCompositeId(ModelPropertyMetaI aMeta, String aUrlDelimiter) throws Exception {
-		PropertyDescriptor pd = aMeta.getPropertyDescriptor();
-		ModelMetaI mm = aMeta.getTargetMeta();
+	public static Object createModelPropertyWithCompositeId(ModelPropertyMetaI aMeta, final String aUrlDelimiter) throws Exception {
+		final PropertyDescriptor pd = aMeta.getPropertyDescriptor();
+		final ModelMetaI mm = aMeta.getTargetMeta();
 		return new Object() {
             public String name = pd.getName();
             public Object type = pd.getPropertyType().getSimpleName();
@@ -314,7 +357,7 @@ public final class ControllerTemplateDatas
 		int index = 0;
 		for(String idName : aIdPropertyMap.keySet()) {
 			final int finalIndex = index;
-			PropertyDescriptor pd = aIdPropertyMap.get(idName).getPropertyDescriptor();
+			final PropertyDescriptor pd = aIdPropertyMap.get(idName).getPropertyDescriptor();
 			properties.add(new Object(){
                 public Object propertySetterName = pd.getWriteMethod().getName();
                 public Object propertyType = pd.getPropertyType().getSimpleName();
@@ -350,9 +393,14 @@ public final class ControllerTemplateDatas
 		return props;
 	}
 	
-	public static Object createModelCollecionProperty(ModelPropertyMetaI aMeta, String aControllerPostfix) throws Exception {
-		PropertyDescriptor pd = aMeta.getPropertyDescriptor();
-		ModelMetaI mm = aMeta.getTargetMeta();
+	public static Object createModelCollecionProperty(final ModelPropertyMetaI aMeta, final String aControllerPostfix) throws Exception {
+		final PropertyDescriptor pd = aMeta.getPropertyDescriptor();
+		final ModelMetaI mm = aMeta.getTargetMeta();
+		
+		boolean isMap = Map.class.isAssignableFrom(pd.getPropertyType());
+		final Object isMapVal = isMap ? new Object() : null;
+		final Object keyTypeVal = isMap ? ((ParameterizedType)pd.getReadMethod().getGenericReturnType()).getActualTypeArguments()[0].getTypeName() : null;
+
 		return new Object() {
             public String name = pd.getName();
             public Object type = pd.getPropertyType().getSimpleName();
@@ -369,18 +417,20 @@ public final class ControllerTemplateDatas
             public Object loopVariable = mm.getModelClass().getSimpleName() + "var";
 //            public Object singular = mm.getModelClass().getSimpleName().toLowerCase();
             public Object modelPlural = mm.getModelAnnotation().plural();
+            public Object isMap = isMapVal;
+            public Object keyType = keyTypeVal;
        };
  	}
 	
-	public static Object createModelSimpleIdSetters(ModelMetaI aMeta) {
+	public static Object createModelSimpleIdSetters(final ModelMetaI aMeta) {
 		if(aMeta.getIdType() != IdTypeEnum.simple) return null;
-		SimplePropertyMetaI meta = aMeta.getIdPathParameterMetas().get(aMeta.getSingularIdName());
-		PropertyDescriptor desc = meta.getPropertyDescriptor();
-		Object property = new Object() {
+		final SimplePropertyMetaI meta = aMeta.getIdPathParameterMetas().get(aMeta.getSingularIdName());
+		final PropertyDescriptor desc = meta.getPropertyDescriptor();
+		final Object property = new Object() {
 			public Object setterName = desc.getWriteMethod().getName();
             public Object idPropertyName = aMeta.getSingularIdName();
         };
-		Object nonGenerated = meta.isGenerated() ? null : property;
+		final Object nonGenerated = meta.isGenerated() ? null : property;
 			
 		return new Object() {
 	        public Object nonGeneratedIdProperty = nonGenerated;
@@ -390,13 +440,13 @@ public final class ControllerTemplateDatas
 	
 	public static Object createModelEmbeddedIdSetters(ModelMetaI aMeta) throws Exception {
 		if(aMeta.getIdType() != IdTypeEnum.embedded) return null;
-		SimplePropertyMetaI meta = aMeta.getEmbeddedIdPathParameterMetas().get(aMeta.getSingularIdName());
-		PropertyDescriptor desc = meta.getPropertyDescriptor();
+		final SimplePropertyMetaI meta = aMeta.getEmbeddedIdPathParameterMetas().get(aMeta.getSingularIdName());
+		final PropertyDescriptor desc = meta.getPropertyDescriptor();
 		
 		Set nameSet = new HashSet();
-		List idProps = new ArrayList();
-		List nonGenIdProps = new ArrayList();
-		for(PropertyDescriptor pd : Introspector.getBeanInfo(desc.getPropertyType()).getPropertyDescriptors()) {
+		final List idProps = new ArrayList();
+		final List nonGenIdProps = new ArrayList();
+		for(final PropertyDescriptor pd : Introspector.getBeanInfo(desc.getPropertyType()).getPropertyDescriptors()) {
 			if(pd.getName() == "class" || pd.getWriteMethod() == null) continue;
 			nameSet.add(pd.getName());
 			Object prop = new Object() {
@@ -412,7 +462,7 @@ public final class ControllerTemplateDatas
 				(f == null || f.getAnnotation(GeneratedValue.class) == null))
 				nonGenIdProps.add(prop);
 		}
-		for(Field f : desc.getPropertyType().getDeclaredFields()) {
+		for(final Field f : desc.getPropertyType().getDeclaredFields()) {
 			if(nameSet.contains(f.getName())) continue;
 			Object prop = new Object() {
 	            public Object setter = null;
@@ -434,16 +484,16 @@ public final class ControllerTemplateDatas
 	    };
 	}
 	
-	public static Object createModelCompositeIdSetters(ModelMetaI aMeta) throws Exception {
+	public static Object createModelCompositeIdSetters(final ModelMetaI aMeta) throws Exception {
 		if(aMeta.getIdType() != IdTypeEnum.composite) return null;
 		BeanInfo idbi = Introspector.getBeanInfo(aMeta.getIdClass(), Introspector.USE_ALL_BEANINFO);
 		
 		Set nameSet = new HashSet();
-		List idProps = new ArrayList();
-		List nonGenIdProps = new ArrayList();
-		for(PropertyDescriptor pd : idbi.getPropertyDescriptors()) {
+		final List idProps = new ArrayList();
+		final List nonGenIdProps = new ArrayList();
+		for(final PropertyDescriptor pd : idbi.getPropertyDescriptors()) {
 			if(pd.getName() == "class" || pd.getWriteMethod() == null) continue;
-			SimplePropertyMetaI meta = aMeta.getIdPathParameterMetas().get(pd.getName());
+			final SimplePropertyMetaI meta = aMeta.getIdPathParameterMetas().get(pd.getName());
 			
 			nameSet.add(pd.getName());
 			Object prop = new Object() {
@@ -456,9 +506,9 @@ public final class ControllerTemplateDatas
 			if(!meta.isGenerated())
 				nonGenIdProps.add(prop);
 		}
-		for(Field f : aMeta.getIdClass().getDeclaredFields()) {
+		for(final Field f : aMeta.getIdClass().getDeclaredFields()) {
 			if(nameSet.contains(f.getName())) continue;
-			SimplePropertyMetaI meta = aMeta.getIdPathParameterMetas().get(f.getName());
+			final SimplePropertyMetaI meta = aMeta.getIdPathParameterMetas().get(f.getName());
 			
 			Object prop = new Object() {
                 public Object setterName = meta.getPropertyDescriptor().getWriteMethod().getName();;
@@ -493,10 +543,11 @@ public final class ControllerTemplateDatas
 		    public Object nonGeneratedIdPath = createIdPath(aMeta, aConfiguration.getUrlIdDelimiter(), false);
 		    public Object modelOuterWrapperType = aMeta.getModelClass().getSimpleName() + "OW";
 		    public Object nonGeneratedIdMethodParameters = createIdMethodParameters(aMeta, false);
+		    public Object hasNonGenIds = createHasNonGenIds(aMeta);
 		    public Object outerWrapperVariableName = aConfiguration.getModelVariableName() + "OW";
 		    public String modelInnerWrapperType = aMeta.getModelClass().getSimpleName() + "IW";
 		    public Object modelVariableName = aConfiguration.getModelVariableName();
-//		    public String innerWrapperVariableName = aConfiguration.getModelVariableName() + "IW";
+		    public String innerWrapperVariableName = aConfiguration.getModelVariableName() + "IW";
 //		    public Object setSingularNonGeneratedIdLines = createSingularIdSetterLines(aMeta, false);
 //		    public Object setModelNonGeneratedIdLines = createModelIdSetterLines(aMeta, innerWrapperVariableName, false);
 		    public Object singular = aMeta.getModelClass().getSimpleName().toLowerCase();
@@ -633,7 +684,7 @@ public final class ControllerTemplateDatas
 		return ArrayList.class;
 	}
 	
-	public static void addImportToCollection(Collection aCollection, Class<?> aType)
+	public static void addImportToCollection(Collection aCollection, final Class<?> aType)
 	{
 		if (!Primitives.unwrap(aType).isPrimitive())
 		{
@@ -641,7 +692,7 @@ public final class ControllerTemplateDatas
 		}
 	}
 
-	public static void addControllerStaticImportToCollection(Collection aCollection, Class<?> aType, String aControllerExtension)
+	public static void addControllerStaticImportToCollection(Collection aCollection, final Class<?> aType, final String aControllerExtension)
 	{
 		if (!Primitives.unwrap(aType).isPrimitive())
 		{

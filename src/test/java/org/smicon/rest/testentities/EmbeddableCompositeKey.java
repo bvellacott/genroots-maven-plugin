@@ -3,12 +3,14 @@ package org.smicon.rest.testentities;
 import java.util.Date;
 
 import javax.persistence.Embeddable;
+import javax.persistence.GeneratedValue;
 
 @Embeddable
 public class EmbeddableCompositeKey {
 
 	int emKey1;
 	String emKey2;
+	@GeneratedValue
 	Date emKey3;
 	
 	@Override
