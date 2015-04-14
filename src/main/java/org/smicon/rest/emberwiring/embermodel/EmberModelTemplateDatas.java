@@ -1,12 +1,21 @@
 package org.smicon.rest.emberwiring.embermodel;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.smicon.rest.emberwiring.metas.ModelMetaI;
 
 public final class EmberModelTemplateDatas
 {
+	
+	public static EmberModelTypeConfigurationI createTypeConfiguration()
+	{
+		return new EmberModelTypeConfigurationInstance();
+	}
+
 	public static Object createEmberModelTemplateData(final ModelMetaI aMeta, final EmberModelTypeConfigurationI aConfiguration) throws Exception
 	{
 		Object data = new Object() {
@@ -126,4 +135,87 @@ public final class EmberModelTemplateDatas
 		return aObjectForm.substring(0,1).toLowerCase() + aObjectForm.substring(1);
 	}
 	
+	static class EmberModelTypeConfigurationInstance
+	implements 
+	EmberModelTypeConfigurationI
+	{
+		Set<Class> javaTypesRepresentingEmberNumbers;
+		Set<Class> javaTypesRepresentingEmberBooleans;
+		Set<Class> javaTypesRepresentingEmberDates;
+		Set<Class> javaTypesRepresentingEmberStrings;
+		Set<Class> javaTypesRepresentingEmberArrays;
+		Set<Class> javaTypesRepresentingEmberObjects;
+		
+		EmberModelTypeConfigurationInstance()
+		{
+			javaTypesRepresentingEmberNumbers = new HashSet<Class>((Collection<? extends Class>) default_java_types_representing_ember_numbers);
+			javaTypesRepresentingEmberBooleans = new HashSet<Class>((Collection<? extends Class>) default_java_types_representing_ember_booleans);
+			javaTypesRepresentingEmberDates = new HashSet<Class>((Collection<? extends Class>) default_java_types_representing_ember_dates);
+			javaTypesRepresentingEmberStrings = new HashSet<Class>((Collection<? extends Class>) default_java_types_representing_ember_strings);
+			javaTypesRepresentingEmberArrays = new HashSet<Class>((Collection<? extends Class>) default_java_types_representing_ember_arrays);
+			javaTypesRepresentingEmberObjects = new HashSet<Class>((Collection<? extends Class>) default_java_types_representing_ember_objects);
+		}
+
+		public Set<Class> getJavaTypesRepresentingEmberNumbers()
+		{
+			return this.javaTypesRepresentingEmberNumbers;
+		}
+
+		public void setJavaTypesRepresentingEmberNumbers(Set<Class> javaTypesRepresentingEmberNumbers)
+		{
+			this.javaTypesRepresentingEmberNumbers = javaTypesRepresentingEmberNumbers;
+		}
+
+		public Set<Class> getJavaTypesRepresentingEmberBooleans()
+		{
+			return this.javaTypesRepresentingEmberBooleans;
+		}
+
+		public void setJavaTypesRepresentingEmberBooleans(Set<Class> javaTypesRepresentingEmberBooleans)
+		{
+			this.javaTypesRepresentingEmberBooleans = javaTypesRepresentingEmberBooleans;
+		}
+
+		public Set<Class> getJavaTypesRepresentingEmberDates()
+		{
+			return this.javaTypesRepresentingEmberDates;
+		}
+
+		public void setJavaTypesRepresentingEmberDates(Set<Class> javaTypesRepresentingEmberDates)
+		{
+			this.javaTypesRepresentingEmberDates = javaTypesRepresentingEmberDates;
+		}
+
+		public Set<Class> getJavaTypesRepresentingEmberStrings()
+		{
+			return this.javaTypesRepresentingEmberStrings;
+		}
+
+		public void setJavaTypesRepresentingEmberStrings(Set<Class> javaTypesRepresentingEmberStrings)
+		{
+			this.javaTypesRepresentingEmberStrings = javaTypesRepresentingEmberStrings;
+		}
+
+		public Set<Class> getJavaTypesRepresentingEmberArrays()
+		{
+			return this.javaTypesRepresentingEmberArrays;
+		}
+
+		public void setJavaTypesRepresentingEmberArrays(Set<Class> javaTypesRepresentingEmberArrays)
+		{
+			this.javaTypesRepresentingEmberArrays = javaTypesRepresentingEmberArrays;
+		}
+
+		public Set<Class> getJavaTypesRepresentingEmberObjects()
+		{
+			return this.javaTypesRepresentingEmberObjects;
+		}
+
+		public void setJavaTypesRepresentingEmberObjects(Set<Class> javaTypesRepresentingEmberObjects)
+		{
+			this.javaTypesRepresentingEmberObjects = javaTypesRepresentingEmberObjects;
+		}
+
+	}
+
 }

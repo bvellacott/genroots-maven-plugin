@@ -14,7 +14,7 @@ extends ConfigurationI
 	public static final String default_postfix = "";
 	public static final File default_output_directory = new File("src/main/webapp/js/models");
 	public static final String default_template_file_name = "EmberModel.mustache";
-	public static final EmberModelTypeConfigurationI default_type_configuration = new DefaultEmberModelTypeConfiguration();
+	public static final EmberModelTypeConfigurationI default_type_configuration = EmberModelTemplateDatas.createTypeConfiguration();
 
 	String getModelPostfix();
 	
